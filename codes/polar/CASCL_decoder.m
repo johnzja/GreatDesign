@@ -14,7 +14,7 @@ P = zeros(N - 1, L); %Channel llr is public-used, so N - 1 is enough.
 C = zeros(N - 1, 2 * L);%I do not esitimate (x1, x2, ... , xN), so N - 1 is enough.
 u = zeros(K, L);%unfrozen bits that polar codes carry, including crc bits.
 PM = zeros(L, 1);%Path metrics
-activepath = zeros(L, 1);%Indicate if the path is active. '1'¡úactive; '0' otherwise.
+activepath = zeros(L, 1);%Indicate if the path is active. '1'->active; '0' otherwise.
 cnt_u = 1;%information bit counter 
 %initialize
 activepath(1) = 1;
