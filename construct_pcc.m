@@ -97,8 +97,12 @@ end
 PCC.unfrozen_bits_cnt = unfrozen_length;
 PCC.info_bits_cnt = M;
 PCC.parity_bits_cnt = K;
+PCC.N = N;
 PCC.parity_bits_index = parity_bits_index;
+PCC.nonfrozen_bits_logical = info_bits_logical;
 
+%% SAVE config e.mat files.
+save('data/PCC_config.mat', 'PCC');
 
 
 %% useful functions.
