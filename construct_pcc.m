@@ -7,7 +7,7 @@ addpath('codes/polar/GA/');
 n = 9;
 N = 2^n;    % N=512 polar code.
 M = 256;    % info bits.
-K = 8;     % parity bits,
+K = 18;     % parity bits,
 
 % Using heuristic construction.
 %% Step1: Display channel realibility by graph.
@@ -44,9 +44,17 @@ for k = 1:M+K
     end
 end
 
+% find boundaries for each burst_err seg.
+% Notice: when K is large, burst-segs may be too small to contain K
+% different bits to be checked. Then this PCC code can be constructed
+% manually.
 reliability_diff = diff(err_prob_log10);
 [~, i_burst_err_seg_boundaries] = sort(reliability_diff, 'descend');
-i_burst_err_seg_boundaries = sort(i_burst_err_seg_boundaries(1:K-1));   % this vector sequentially stores the end index of each burst-err-seg, excepting the last one.
+
+figure;
+stem(1:unfrozen_length, err_prob_log10, 'bo');
+i_burst_err_seg_boundaries = [20, 45, 63, 80, 99, 114, 129, 141, 153, 163, 174, 186, 194, 202, 210, 214, 218, 242];
+% i_burst_err_seg_boundaries = sort(i_burst_err_seg_boundaries(1:K-1));   % this vector sequentially stores the end index of each burst-err-seg, excepting the last one.
 logical_burst_err_seg_boundary = false(1,unfrozen_length);
 logical_burst_err_seg_boundary(i_burst_err_seg_boundaries) = true;
 
@@ -54,6 +62,7 @@ figure;
 hold on;
 scatter(1:unfrozen_length, err_prob_log10, 'b*');
 scatter(i_burst_err_seg_boundaries, err_prob_log10(logical_burst_err_seg_boundary), 'ro');
+grid on;
 
 %% Step3: Insert parity bits to construct PCC code.
 % Use these boundaries.
@@ -103,12 +112,12 @@ PCC.nonfrozen_bits_logical = info_bits_logical;
 % PCC.info_bits_wrt_nonfrozen_logical = ~parity_bits_used;
 
 %% SAVE config e.mat files.
-save('data/PCC_config.mat', 'PCC');
+save('data/PCC_config_K18.mat', 'PCC');
 disp('File saved.');
 
 %% useful functions.
 function ret=convert_to_log10(x)
-    if x>5
+    if x>10
         ret = -x*log10(exp(1));
     else
         ret = -log10(1+exp(x));
