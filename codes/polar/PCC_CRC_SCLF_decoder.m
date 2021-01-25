@@ -287,7 +287,7 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
                 return;
             end
         end
-        fprintf('T=%d error \n', t);
+        % fprintf('T=%d error \n', t);
         %% Errors here. All the paths fail to pass the CRC test. 
 %         info_with_CRC = u(:,1); % the most possible one, with the smallest path metric.
 %         info_with_CRC = info_with_CRC(info_bits_wrt_nonfrozen_logical);

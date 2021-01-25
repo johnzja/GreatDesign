@@ -14,7 +14,7 @@ function BLER = sim_PCC(PCC_struct, Ebn0, min_errors, L)
     % model: Binomial(n,p), To estimate p.
     
     sigma_sim = 1/(sqrt(2*R))*10^(-Ebn0/20);
-    fprintf('Estimating BLER @ Eb/n0=%.2f dB\n', Ebn0);
+    fprintf('Estimating BLER @ Eb/n0=%.2f dB for PCC-Polar SCL decoder.\n', Ebn0);
     N_runs = 0;
     N_PCC_errs = 0;
     
@@ -38,12 +38,11 @@ function BLER = sim_PCC(PCC_struct, Ebn0, min_errors, L)
         end
 
         N_runs = N_runs + 1;
-        if mod(N_runs, min_errors/10) == 0
+        if mod(N_runs, min_errors/20) == 0
             fprintf('Estimating BLER @ Eb/n0=%.2f dB, Complete: %.2f%%\n', ...
             Ebn0, 100*(N_PCC_errs / min_errors));
         end
     end
     BLER = N_PCC_errs / N_runs;
     
-
 end

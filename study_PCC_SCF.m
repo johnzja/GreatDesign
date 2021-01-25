@@ -8,108 +8,64 @@
 % Three possibilities: identical, non-identical, >=3 (odd number) errors.
 % construct SCFlip decoder.
 clear;clc;
-addpath('codes/');
-addpath('codes/polar/');
-addpath('codes/polar/GA/');
+addpath('sim/');
 
-%% Step1: Construct PCC-CRC-Polar codes.
-K_CRC = 4;
-K_PCC = 8;
-N = 512;        % mid-short polar code.
+%% Simulate CRC-PCC-SCLF code.
+% Compare: K_CRC=4, K_PCC=8 code+SCLF v.s. K_PCC=12 code.
+N = 512;
 M = 256;
-L = 16;         % decode list size.
+K_SCLF_CRC = 8;
+K_SCLF_PCC = 8;
+K_PCC = 12;
 
-% Get CRC object.
-[gen, det, g] = get_crc_objective(K_CRC);
-n = log2(N);
-
-[G_crc, H_crc] = crc_generator_matrix(g, M);
-CRC_Qmatrix = G_crc(:, M+1 : end);        % Generator matrix for CRC bits.; G=[I,Q].
-
-% Calculate some handy variables used in general SCL decoder.
-lambda_offset = 2.^(0:n);
-llr_layer_vec = get_llr_layer(N);
-bit_layer_vec = get_bit_layer(N);
-R = M/N;        % code rate.
-
-% Concatenation scheme: info bits => [info bits, CRC] => [info bits, CRC, PCC] => x_1^N, polar codeword.
 design_Ebn0 = 1.5;
-[PCC_structs, GA_ch_reliability] = get_standard_PCC(N, M+K_CRC, design_Ebn0);
+[PCC_structs, ~] = get_standard_PCC(N,M,design_Ebn0);
 
-PCC_conf = PCC_structs(K_PCC);                   % Select the object with K_PCC additional parity bits.
-PCC_CRC_polar_config.PCC_conf = PCC_conf;
-PCC_CRC_polar_config.N = N;
-PCC_CRC_polar_config.M = M;                 % cnt. info bits.
-PCC_CRC_polar_config.H_CRC = H_crc;         % CRC-Check matrix.
-PCC_CRC_polar_config.Q_CRC = CRC_Qmatrix;   % Redundancy Generator matrix.
-PCC_CRC_polar_config.K_CRC = K_CRC;         % cnt. Additional CRC bits.
+PCC = PCC_structs(K_PCC);
 
+% Ebn0_arr = 1.0:0.2:2.4;
+Ebn0_arr = [1.5];           % All under this Eb/n0.
+min_errors = 1200;
+N_ebn0 = length(Ebn0_arr);
+L = 16;
+T = 32;
 
-%% Construct SRCS set according to the constructed CRC-PCC-Polar code.
-nbl = PCC_conf.nonfrozen_bits_logical;
-CS = nbl;   % Critical set.
-for k = 1:n
-    step = 2^k;
-    cnt_iter = N/step;
-    for iter = 1:cnt_iter
-        start_index = (iter-1)*step+1;
-        stop_index = start_index+step-1;
-        if all(nbl(start_index:stop_index))
-            CS(start_index:stop_index) = zeros(step,1);
-            CS(start_index) = 1;
-        end
-    end
-end
+BLERs = zeros(3, N_ebn0);
+K_SCLF_CRC_arr = [4, 6, 8, 10, 12];
+K_SCLF_PCC_arr = (4:1:16);
 
-% Sort CS according to GA-estimated channel reliability.
-tmp = (1:N).';
-CS = tmp(CS);
-CS_reliability = GA_ch_reliability(CS);
-[~, CS_order] = sort(CS_reliability, 'ascend');
-CS = CS(CS_order);
+%% Simulation Loop.
+% parfor sim_setup_iter = 1:3
+%     for ebn0_iter = 1:N_ebn0
+%         Ebn0 = Ebn0_arr(ebn0_iter);
+%         switch sim_setup_iter
+%             case 1
+%                 BLERs(sim_setup_iter,ebn0_iter) = sim_PCC(PCC, Ebn0, min_errors, L);
+%             case 2
+%                 BLERs(sim_setup_iter,ebn0_iter) = sim_PCC_SCLF(K_SCLF_CRC, K_SCLF_PCC, N,M,Ebn0, min_errors, L, 0);
+%             case 3
+%                 BLERs(sim_setup_iter,ebn0_iter) = sim_PCC_SCLF(K_SCLF_CRC, K_SCLF_PCC, N,M,Ebn0, min_errors, L, T);
+%         end
+%     end
+% end
 
-% Construct the information structure needed for the PCC-CRC-Polar decoder.
-PCC_CRC_polar_decoder_info.L = L;
-PCC_CRC_polar_decoder_info.lambda_offset = lambda_offset;
-PCC_CRC_polar_decoder_info.llr_layer_vec = llr_layer_vec;
-PCC_CRC_polar_decoder_info.bit_layer_vec = bit_layer_vec;
-PCC_CRC_polar_decoder_info.CS = CS;
-PCC_CRC_polar_decoder_info.T = 32;  % Trials = 32.
+% simulate without bit-flipping.
+% using CRC-PCC-Polar concatenation scheme.
+N_CRC_arr = length(K_SCLF_CRC_arr);
+N_PCC_arr = length(K_SCLF_PCC_arr);
 
-%% CRC-PCC-Polar Encoding.
-loops = 0;
-total_error_cnt = 0;
-first_error_pattern = zeros(1,M);
+BLERs_mat = zeros(N_CRC_arr, N_PCC_arr);
+Ebn0 = Ebn0_arr(1);
 
-while total_error_cnt < 10000
-    random_bits = (rand([1,M])>0.5);
-    CRC_aided_bits = [random_bits, logical(mod(random_bits*PCC_CRC_polar_config.Q_CRC, 2))];  % row vector.
-    PCC_CRC_encoded_bits = PCC_polar_encoder(CRC_aided_bits, PCC_CRC_polar_config.PCC_conf);
-
-    %% Channel.
-    Ebn0 = 1.4;
-    x_PCC_CRC = 1-2*PCC_CRC_encoded_bits;
-
-    sigma = 1/(sqrt(2*R))*10^(-Ebn0/20);
-    noise_vec = sigma * randn([1,N]);
-    y_PCC_CRC = x_PCC_CRC + noise_vec;
-
-    llr_PCC_CRC = 2*y_PCC_CRC/(sigma^2);
-
-
-    %% CRC-PCC-Polar Decoding.
-    polar_info_esti_PCC_CRC = PCC_CRC_SCLF_decoder(llr_PCC_CRC, PCC_CRC_polar_config, PCC_CRC_polar_decoder_info);
-    loops = loops + 1;
-    errs = xor(polar_info_esti_PCC_CRC, random_bits);
-    if any(errs)
-        ind = find(errs,1);
-        first_error_pattern(ind) = first_error_pattern(ind) + 1;
-        total_error_cnt = total_error_cnt + 1;
+for k_crc_iter = 1:N_CRC_arr
+    for k_pcc_iter = 1:N_PCC_arr
+        K_SCLF_CRC = K_SCLF_CRC_arr(k_crc_iter);
+        K_SCLF_PCC = K_SCLF_PCC_arr(k_pcc_iter);
+        BLERs(k_crc_iter, k_pcc_iter) = sim_PCC_SCLF(K_SCLF_CRC, K_SCLF_PCC, N, M, Ebn0, min_errors, L, 0);
+        % do not invoke bit-flip now.
     end
 end
 
 
-
-disp('Complete');
 
 
