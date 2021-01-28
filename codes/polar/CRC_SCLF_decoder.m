@@ -3,17 +3,13 @@ function polar_info_esti = CRC_SCLF_decoder(llr, decoder_info)
     % Parameters:
     % llr: vector of length N.
     % L: list size.
-    % M: cnt. of  bits.
-    % lambda_offset
-    % llr_layer_vec
-    % bit_layer_vec
     
     N = length(llr);
     n = log2(N);
     
     %% Extract info from decoder_info structure.
-    M = decoder_info.info_bits_cnt;
-    K = decoder_info.crc_bits_cnt;
+    M = decoder_info.M;
+    K = decoder_info.K_CRC;     % K_CRC.
     
     nonfrozen_bits_logical = decoder_info.nonfrozen_bits_logical;   % including crc bits and info bits.
     
@@ -103,9 +99,8 @@ function polar_info_esti = CRC_SCLF_decoder(llr, decoder_info)
             end
 
             % HERE: down to the leaf of the decoding tree.
-            pcc_eqn_index = find(parity_locs_wrt_nonfrozen_bits==cnt_u,1);
 
-            if nonfrozen_bits_logical(phi + 1) && isempty(pcc_eqn_index)    
+            if nonfrozen_bits_logical(phi + 1)
                 % if now we decode an info bit
                 PM_pair = realmax * ones(2, L);
                 for l_index = 1 : L
@@ -183,49 +178,24 @@ function polar_info_esti = CRC_SCLF_decoder(llr, decoder_info)
                     end
                 end
                 cnt_u = cnt_u + 1;
-            else    % non-info bit operation.
-
-                if nonfrozen_bits_logical(phi+1) == 1
-                    for l_index = 1:L
-                        if activepath(l_index) == 0
-                            continue;
-                        end
-                        % Calculate parity check using previously-decoded bits.
-                        pcc_eqn = PCEqns{pcc_eqn_index}(1:end-1);
-                        p = mod(sum(u(pcc_eqn,l_index)),2);
-
-                        % LLR<0: like 1; LLR>0: like 0.
-                        if ((1-2*p)*P(1, l_index)) < 0    % this bit looks different from p, then add loss to PM.
-                            PM(l_index) = PM(l_index) + abs(P(1, l_index));
-                        end
-
-                        if phi_mod_2 == 0               % odd-indexed frozen bit.
-                            C(1, 2 * l_index - 1) = p;  % Left.
-                        else
-                            C(1, 2 * l_index) = p;      % Right.
-                        end 
-                        u(cnt_u, l_index) = p;          
+            else
+                % non-info bit operation. It must be a frozen bit.
+                for l_index = 1:L
+                    if activepath(l_index) == 0
+                        continue;
                     end
-                    cnt_u = cnt_u + 1;
-                else
-                    for l_index = 1:L
-                        if activepath(l_index) == 0
-                            continue;
-                        end
-                        if P(1, l_index) < 0    % this bit looks like 1, then add loss to PM.
-                            PM(l_index) = PM(l_index) - P(1, l_index);
-                        end
-                        if phi_mod_2 == 0               % odd-indexed frozen bit.
-                            C(1, 2 * l_index - 1) = 0;  % Left.
-                        else
-                            C(1, 2 * l_index) = 0;      % Right.
-                        end 
+                    if P(1, l_index) < 0    % this bit looks like 1, then add loss to PM.
+                        PM(l_index) = PM(l_index) - P(1, l_index);
                     end
+                    if phi_mod_2 == 0               % Odd-indexed frozen bit.
+                        C(1, 2 * l_index - 1) = 0;  % Left.
+                    else
+                        C(1, 2 * l_index) = 0;      % Right.
+                    end 
                 end
-
             end 
 
-            for l_index = 1 : L%partial-sum return
+            for l_index = 1 : L                     % partial-sum return
                 if activepath(l_index) == 0
                     continue
                 end
@@ -256,10 +226,10 @@ function polar_info_esti = CRC_SCLF_decoder(llr, decoder_info)
                 end
             end
         end
-
+        
         %% All the source bits are decoded now.
-        H_CRC = PCC_CRC_conf.H_CRC;
-        K_CRC = PCC_CRC_conf.K_CRC;
+        H_CRC = decoder_info.H_CRC;
+        K_CRC = decoder_info.K_CRC;
         [~, order] = sort(PM);
         u(:,1:L) = u(:,order);  % sort the estimated info+CRC sequence.
         PM = PM(order);
@@ -269,7 +239,6 @@ function polar_info_esti = CRC_SCLF_decoder(llr, decoder_info)
         
         for l_index = 1:L
             info_with_CRC = u(:,l_index);
-            info_with_CRC = info_with_CRC(info_bits_wrt_nonfrozen_logical);
             CRC_check = mod(H_CRC * info_with_CRC,2);  % Perform CRC check.
             if all(~CRC_check)
                 % Remove CRC bits.
@@ -287,11 +256,10 @@ function polar_info_esti = CRC_SCLF_decoder(llr, decoder_info)
         if t==0
             % initialize the RCS set.
             SC_states_index = SC_state(CS);
-            f = SC_states_index==1;
+            f = SC_states_index==1;     % may be unuseful.
             if ~any(f)
                 % cannot be flipped.
                 info_with_CRC = u(:,1); % the most possible one, with the smallest path metric.
-                info_with_CRC = info_with_CRC(info_bits_wrt_nonfrozen_logical);
                 polar_info_esti = logical(info_with_CRC(1:end-K_CRC)).';
                 return;
             end
@@ -313,7 +281,6 @@ function polar_info_esti = CRC_SCLF_decoder(llr, decoder_info)
             % Give the best answer to date.
             [~, order] = sort(historical_PM);
             info_with_CRC = historical_u(:,order(1));
-            info_with_CRC = info_with_CRC(info_bits_wrt_nonfrozen_logical);
             polar_info_esti = logical(info_with_CRC(1:end-K_CRC)).';
             return;
         end

@@ -3,8 +3,8 @@ load data/bler_pccscl_sclf_crc8_pcc8.mat;
 
 figure(1);
 hold on;
-plot(Ebn0_arr, BLERs(1,:), 'bx-');
-plot(Ebn0_arr, BLERs(2,:), 'gx-');
+plot(Ebn0_arr, BLERs(1,:), 'kx-');
+plot(Ebn0_arr, BLERs(2,:), 'mx-');
 plot(Ebn0_arr, BLERs(3,:), 'rx-');
 grid on;
 set(gca, 'yscale', 'log');
@@ -12,8 +12,14 @@ xlabel('Eb/n_0');
 ylabel('BLER');
 
 load data/bler_sclf_crc8_pcc4.mat;
+plot(Ebn0_arr, BLERs, 'bx-');
+
+load data/bler_crc8_casclf_t32.mat;
 plot(Ebn0_arr, BLERs, 'cx-');
-legend('PCC12-SCL', 'CRC8-PCC8-SCL', 'CRC8-PCC8-SCLF(T=32)', 'CRC8-PCC4-SCLF(T=32)');
+
+load data/bler_crc8_cascl.mat
+plot(Ebn0_arr, BLERs, 'cs-');
+legend('PCC12-SCL', 'CRC8-PCC8-SCL', 'CRC8-PCC8-SCLF(T=32)', 'CRC8-PCC4-SCLF(T=32)', 'CRC8-SCLF(T=32)', 'CRC8-SCL');
 
 %% Plot2: plot the code performance with K_CRC and K_PCC.
 % 2-Dim plot.
