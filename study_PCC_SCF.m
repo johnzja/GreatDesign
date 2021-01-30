@@ -40,3 +40,4 @@ for ebn0_iter = 1:N_ebn0
 end
 
 save('data/test.mat');
+disp('Save file complete!');

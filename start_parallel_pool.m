@@ -1,3 +1,3 @@
 c = parcluster('local');
-c.NumWorkers = 64;
+c.NumWorkers = 32;
 parpool(c, c.NumWorkers);
