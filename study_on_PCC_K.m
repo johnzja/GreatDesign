@@ -88,7 +88,7 @@ for K = 1:K_max
 end
 
 disp('PCC code construction complete.');
-Ebn0 = 1.5;
+Ebn0 = 1.25;
 
 %% Simulation Loop.
 max_errors = 1600;
@@ -100,8 +100,7 @@ end
 
 disp('Simulation complete');
 
-
-
+save(['data/PCC_K_Ebn0=', num2str(Ebn0), '.mat'], 'BLERs', 'PCC');
 
 %% Useful Functions.
 function ret_index = find_most_unreliable(is_used, LLRs)
