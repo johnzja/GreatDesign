@@ -68,7 +68,7 @@ function BLER = sim_CA_SCLF(K_CRC, N, M, Ebn0, min_errors, L, T)
     %% Start Simulation.
     % model: Binomial(n,p), To estimate p as BLER.
     sigma_sim = 1/(sqrt(2*R))*10^(-Ebn0/20);
-    fprintf('Estimating BLER @ Eb/n0=%.2f dB for CRC-PCC-Polar SCLF decoder.\n', Ebn0);
+    fprintf('Estimating BLER @ Eb/n0=%.2f dB for CRC-Polar SCL decoder.\n', Ebn0);
     
     % Add parallel support,
     N_parallel = 4;
