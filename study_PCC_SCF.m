@@ -25,7 +25,7 @@ PCC = PCC_structs(K_PCC);
 
 % Ebn0_arr = 1.0:0.2:2.4;
 Ebn0_arr = [2.25, 2.5, 2.75];           % All under this Eb/n0.
-min_errors = 1200;
+min_errors = 1600;
 N_ebn0 = length(Ebn0_arr);
 L = 16;
 T = 32;

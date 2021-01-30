@@ -66,7 +66,7 @@ function BLER = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
     fprintf('Estimating BLER @ Eb/n0=%.2f dB for CRC-PCC-Polar SCLF decoder.\n', Ebn0);
     
     % Add parallel support,
-    N_parallel = 24;            
+    N_parallel = 32;            
     assert(mod(min_errors, N_parallel) == 0, 'invalid N_parallel!');
     min_errors_each = min_errors / N_parallel;
     N_runs_each = zeros(1, N_parallel);
@@ -96,7 +96,7 @@ function BLER = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
             end
 
             N_runs = N_runs + 1;
-            if mod(N_runs, min_errors/100) == 0
+            if mod(N_runs, min_errors) == 0
                 fprintf('Worker %d: Estimating BLER @ Eb/n0=%.2f dB, Complete: %.2f%%\n', ...
                 p_iter, Ebn0, 100*(N_PCC_SCLF_errs / min_errors_each));
             end
