@@ -11,14 +11,22 @@ set(gca, 'yscale', 'log');
 xlabel('Eb/n_0');
 ylabel('BLER');
 
+% CRC-PCC-polar code with flip(T=32).
 load data/bler_sclf_crc8_pcc4.mat;
 plot(Ebn0_arr, BLERs, 'bx-');
 
-load data/bler_crc8_casclf_t32.mat;
-plot(Ebn0_arr, BLERs, 'cx-');
+% load data/bler_crc8_casclf_t32.mat;
+% plot(Ebn0_arr, BLERs, 'cx-');
+% 
+% load data/bler_crc8_cascl.mat
+% plot(Ebn0_arr, BLERs, 'cs-');
 
-load data/bler_crc8_cascl.mat
-plot(Ebn0_arr, BLERs, 'cs-');
+% Without PCC: CASCL v.s. CASCL+Flip(T=32).
+load data/bler_crc8_casclf_t0_t32.mat;
+plot(Ebn0_arr, blers_crc8_casclf_t32, 'cx-');
+plot(Ebn0_arr, blers_crc8_cascl, 'cs-');
+
+
 legend('PCC12-SCL', 'CRC8-PCC8-SCL', 'CRC8-PCC8-SCLF(T=32)', 'CRC8-PCC4-SCLF(T=32)', 'CRC8-SCLF(T=32)', 'CRC8-SCL');
 
 %% Plot2: plot the code performance with K_CRC and K_PCC.
