@@ -1,11 +1,15 @@
 %% step1: Plot curves for sclf.
-load data/bler_pccscl_sclf_crc8_pcc8.mat;
-
 figure(1);
 hold on;
-plot(Ebn0_arr, BLERs(1,:), 'kx-');
+load data/bler_pcc12_t0.mat;
+plot(Ebn0_arr, BLERs, 'kx-');
+
+load data/bler_pccscl_sclf_crc8_pcc8.mat;
 plot(Ebn0_arr, BLERs(2,:), 'mx-');
-plot(Ebn0_arr, BLERs(3,:), 'rx-');
+
+load data/bler_crc8_pcc8_t32.mat
+plot(Ebn0_arr, BLERs, 'rx-');
+
 grid on;
 set(gca, 'yscale', 'log');
 xlabel('Eb/n_0');
