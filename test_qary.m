@@ -22,6 +22,11 @@ N_sim = 100;
 decoder_config.partially_frozen = false;
 decoder_config.is_qary = false;
 decoder_config.is_LLR = true;
+decoder_config.is_Genie = false;
+decoder_config.update_decoder = true;   % it can be automatically modified into false.
+decoder_config.is_list = true;
+%decoder_config.L = 4;
+
 
 for sim_iter = 1:N_sim
     random_bits = (rand([1,M])>0.5);
