@@ -1,30 +1,33 @@
+clear all;
 %% step1: Plot curves for sclf.
-load data/bler_pccscl_sclf_crc8_pcc8.mat;
-
 figure(1);
 hold on;
-plot(Ebn0_arr, BLERs(1,:), 'kx-');
-plot(Ebn0_arr, BLERs(2,:), 'mx-');
-plot(Ebn0_arr, BLERs(3,:), 'rx-');
+% Plot the performance of pure Parity-check-concatenated Polar codes.
+load data/compare_flip_with_others/bler_pcc12_t0.mat;
+plot(Ebn0_arr, BLERs, 'kx-');
+
+% Plot CRC8-PC8 code under SCL without flipping.
+load data/compare_flip_with_others/bler_crc8_pcc8_t0.mat;
+plot(Ebn0_arr, BLERs, 'mx-');
+
+% Plot CRC8-PC8 code under SCLFlip.
+load data/compare_flip_with_others/bler_crc8_pcc8_t32.mat
+plot(Ebn0_arr, BLERs, 'rx-');
+
 grid on;
 set(gca, 'yscale', 'log');
 xlabel('Eb/n_0');
 ylabel('BLER');
 
-% CRC-PCC-polar code with flip(T=32).
-load data/bler_sclf_crc8_pcc4.mat;
+% CRC8-PC4-polar code with flip(T=32).
+load data/compare_flip_with_others/bler_sclf_crc8_pcc4.mat;
 plot(Ebn0_arr, BLERs, 'bx-');
 
-% load data/bler_crc8_casclf_t32.mat;
-% plot(Ebn0_arr, BLERs, 'cx-');
-% 
-% load data/bler_crc8_cascl.mat
-% plot(Ebn0_arr, BLERs, 'cs-');
 
-% Without PCC: CASCL v.s. CASCL+Flip(T=32).
-load data/bler_crc8_casclf_t0_t32.mat;
-plot(Ebn0_arr, blers_crc8_casclf_t32, 'cx-');
-plot(Ebn0_arr, blers_crc8_cascl, 'cs-');
+% Without PCC: CASCL v.s. CASCL+Flip(T=32), all using CRC8.
+load data/compare_flip_with_others/bler_crc8_casclf_t0_t32.mat;
+plot(Ebn0_arr, blers_crc8_casclf_t32, 'gx-');
+plot(Ebn0_arr, blers_crc8_cascl, 'gs-');
 
 
 legend('PCC12-SCL', 'CRC8-PCC8-SCL', 'CRC8-PCC8-SCLF(T=32)', 'CRC8-PCC4-SCLF(T=32)', 'CRC8-SCLF(T=32)', 'CRC8-SCL');
@@ -32,7 +35,7 @@ legend('PCC12-SCL', 'CRC8-PCC8-SCL', 'CRC8-PCC8-SCLF(T=32)', 'CRC8-PCC4-SCLF(T=3
 %% Plot2: plot the code performance with K_CRC and K_PCC.
 % 2-Dim plot.
 
-load data/CRC-PCC_performance_test.mat;
+load data/compare_flip_with_others/CRC-PCC_performance_test.mat;
 BLERs_nf = BLERs;
 figure(2);hold on;
 for idx = 1:5
@@ -43,7 +46,7 @@ xlabel('K\_PCC');ylabel('BLER');
 set(gca, 'yscale', 'log');
 grid on;
 
-load data/CRC-PCC-SCLF_performance_test.mat
+load data/compare_flip_with_others/CRC-PCC-SCLF_performance_test.mat
 BLERs_f = BLERs;
 figure(3);hold on;
 for idx = 1:5
