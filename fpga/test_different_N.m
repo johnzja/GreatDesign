@@ -3,8 +3,8 @@ addpath('codes/');
 addpath('codes/polar/');
 addpath('codes/polar/GA/');
 addpath('sim/');
-N = 16;
-M = 8;
+N = 32;
+M = 16;
 R = M/N;
 n = log2(N);
 
@@ -20,7 +20,7 @@ frozen_bits(info_bits) = 0;
 info_bits_logical = logical(mod(frozen_bits + 1, 2));
 
 % Generate the frozen_bits sequence used in Verilog.
-frozen_str = "16'b";
+frozen_str = sprintf("%d'b", N);
 for i=N:-1:1
     frozen_str = strcat(frozen_str, char('0'+frozen_bits(i)));
 end

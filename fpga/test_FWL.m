@@ -3,13 +3,13 @@ addpath('codes/');
 addpath('codes/polar/');
 addpath('codes/polar/GA/');
 addpath('sim/');
-N = 16;
+N = 32;
 global M;
-M = 8;
+M = 16;
 R = M/N;
 n = log2(N);
 
-info_bits_logical = logical([0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1]);
+info_bits_logical = logical([false;false;false;false;false;false;false;false;false;false;false;true;false;true;true;true;false;false;false;true;false;true;true;true;true;true;true;true;true;true;true;true]).';
 
 %% Add BPSK modulation and calculate the Finite-Word-Length results.
 LLR_WIDTH = 8;                          % In fact, the width in FPGA is LLR_WIDTH+n.
@@ -40,10 +40,13 @@ end
 global decode_result;
 global FPGA_done;
 
-N_sim = 1000;
 N_err = 0;
+min_errors = 50;
+cnt_errors = 0;
+N_runs = 0;
+A = 2.5;        % Amplification factor.
 
-for sim_iter = 1:N_sim
+while cnt_errors < min_errors
     random_bits = (rand([1,M])>0.5);
     u = zeros(1,N);
     u(info_bits_logical) = random_bits;
@@ -57,8 +60,7 @@ for sim_iter = 1:N_sim
     % Map llr into finite-word-length numbers of LLR_WIDTH bits.
     % Ensure there is no overflow
     bit_stream = zeros(1, N);
-    A = 3.5;                      % Amplification factor.
-
+    
     for i = 1:N
         amp = llr(i)*A;
         if amp > 127
@@ -77,9 +79,10 @@ for sim_iter = 1:N_sim
     
     % Initialize FPGA.
     fwrite(app.Com_Obj, 0);  % Initialize
-    fwrite(app.Com_Obj, 16);  % N = 8, trigger FPGA decoder.
+    fwrite(app.Com_Obj, N);  % N = 8, trigger FPGA decoder.
     
     FPGA_done = false;
+    decode_result = [];         % Initialize FPGA globals.
     for i = 1:N
         fwrite(app.Com_Obj, bit_stream(i));
     end
@@ -89,16 +92,17 @@ for sim_iter = 1:N_sim
     % FPGA_done is true now.
     
     if any(decode_result ~= random_bits)
-        N_err = N_err + 1;
+        cnt_errors = cnt_errors + 1;
     end
-    if mod(sim_iter, N_sim/40) == 1
-        fprintf('Complete: %.2f%%\n', sim_iter/N_sim*100);
+    if mod(N_runs, min_errors) == 1
+        fprintf('Complete: %.2f%%\n', cnt_errors/min_errors*100);
     end
+    N_runs = N_runs + 1;
 end
 
 fclose(app.Com_Obj);
 fprintf('FPGA connection closed.\n');
-fprintf('BLER = %f\n', N_err/N_sim);
+fprintf('BLER = %f\n', cnt_errors/N_runs);
 
 
 %% Callback functions for FPGA-UART communication.
@@ -106,9 +110,10 @@ function ComReceiveCallback(app, src, event)
 global decode_result;
 global FPGA_done;
 global M;
+    persistent cnt_bytes;
+    N_bytes = M/8;
 	Com_DataReceive = fread(app,1); % Read 1 byte from FPGA.
-    decode_result = [];
-    for k = 1:M
+    for k = 1:8
         if mod(Com_DataReceive, 2) == 1
             decode_result = [1, decode_result];
         else
@@ -116,6 +121,18 @@ global M;
         end
         Com_DataReceive = floor(Com_DataReceive/2);
     end
-    decode_result = flip(decode_result);
-    FPGA_done = true;
+    
+    if isempty(cnt_bytes)
+        cnt_bytes = 0;
+    end
+    
+    if cnt_bytes < (N_bytes-1)
+        cnt_bytes = cnt_bytes + 1;
+    else
+        cnt_bytes = 0;
+        decode_result = flip(decode_result);
+        FPGA_done = true;
+    end
+    
+    return;
 end
