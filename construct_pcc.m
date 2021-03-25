@@ -4,10 +4,10 @@ addpath('codes/polar/');
 addpath('codes/polar/GA/');
 
 %% Setup Monte-Carlo simulation parameters.
-n = 9;
+n = 5;
 N = 2^n;    % N=512 polar code.
-M = 256;    % info bits.
-K = 18;     % parity bits,
+M = 16;     % info bits.
+K = 2;     % parity bits,
 
 % Using heuristic construction.
 %% Step1: Display channel realibility by graph.
