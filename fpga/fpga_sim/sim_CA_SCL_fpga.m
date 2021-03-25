@@ -1,24 +1,25 @@
-clear;clc;
+function BLER = sim_CA_SCL_fpga(Ebn0, min_errors, amp_factor)
+%% Code parameters are hard-wired inside the FPGA, thus cannot be altered.
 addpath('codes/');
 addpath('codes/polar/');
 addpath('codes/polar/GA/');
-addpath('sim/');
+
 N = 32;
 global M;
-M = 16;
+M = 16;         % Coding rate R = 1/2.
 R = M/N;
 n = log2(N);
 
 K_CRC = 4;
 [~, ~, g] = get_crc_objective(K_CRC);
-[G_crc, H_crc] = crc_generator_matrix(g, M);
-CRC_Qmatrix = G_crc(:, M+1 : end);          % Generator matrix for CRC bits.; G=[I,Q].
+[G_crc, ~] = crc_generator_matrix(g, M);
+CRC_Qmatrix = G_crc(:, M+1 : end);              % Generator matrix for CRC bits.; G=[I,Q].
 
+% Fixed info_bits.
 info_bits_logical = logical([0   0   0   0   0   0   0   1   0   0   0   1   1   1   1   1   0   0   1   1   1   1   1   1   1   1   1   1   1   1   1   1]).';
 
 %% Add BPSK modulation and calculate the Finite-Word-Length results.
-LLR_WIDTH = 8;                              % In fact, the width in FPGA is LLR_WIDTH+n.
-Ebn0 = 3.5;                                 % in dB.
+LLR_WIDTH = 8;                                  % In fact, the width in FPGA is LLR_WIDTH+ADDITIONAL.
 sigma = 1/sqrt(2*R)*(10^(-Ebn0/20));
 
 
@@ -29,13 +30,14 @@ set(app.Com_Obj,'BytesAvailableFcnMode','byte');
 set(app.Com_Obj,'BytesAvailableFcnCount', 1);
 
 app.ComReceiveCallback = @ComReceiveCallback;
-app.Com_Obj.BytesAvailableFcn=@app.ComReceiveCallback;
+app.Com_Obj.BytesAvailableFcn=@app.ComReceiveCallback;  % Setup UART-Receive Callback functions.
+
 if(app.Com_Obj.Status == "closed")
 	fopen(app.Com_Obj);
 	if(app.Com_Obj.Status == "open")
         fprintf(1,'Serial port successfully opened\n'); 
     else
-        fprintf(1,'Serial prot open failed\n');
+        fprintf(1,'Serial port open failed\n');
 	end  
 else
 	fprintf(1,'Serial port has been used by other processes.\n'); 
@@ -45,11 +47,17 @@ end
 global decode_result;
 global FPGA_done;
 
-N_err = 0;
-min_errors = 50;
+if ~exist('min_errors', 'var') || isempty(min_errors)
+    min_errors = 50;
+end
 cnt_errors = 0;
 N_runs = 0;
-A = 3.5;        % Amplification factor.
+
+if ~exist('amp_factor', 'var') || isempty(amp_factor)
+    amp_factor = 3.5;
+end
+A = amp_factor;         % LLR Amplification factor in order to increase the accuracy of LLRs in FPGA.
+
 
 while cnt_errors < min_errors
     random_bits = (rand([1,M])>0.5);
@@ -84,8 +92,8 @@ while cnt_errors < min_errors
     end
     
     % Initialize FPGA.
-    fwrite(app.Com_Obj, 0);  % Initialize
-    fwrite(app.Com_Obj, N);  % N = 8, trigger FPGA decoder.
+    fwrite(app.Com_Obj, 0);     % Initialize
+    fwrite(app.Com_Obj, N);     % Trigger FPGA decoder.
     
     FPGA_done = false;
     decode_result = [];         % Initialize FPGA globals.
@@ -108,11 +116,14 @@ end
 
 fclose(app.Com_Obj);
 fprintf('FPGA connection closed.\n');
-fprintf('BLER = %f\n', cnt_errors/N_runs);
+% fprintf('BLER = %f\n', cnt_errors/N_runs);
+BLER = cnt_errors / N_runs;
+
+end
 
 
 %% Callback functions for FPGA-UART communication.
-function ComReceiveCallback(app, src, event)
+function ComReceiveCallback(app, ~, ~)
 global decode_result;
 global FPGA_done;
 global M;
