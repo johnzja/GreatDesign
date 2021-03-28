@@ -4,7 +4,7 @@ addpath('codes/polar/');
 addpath('codes/polar/GA/');
 addpath('sim/');
 N = 32;
-M = 16;
+M = 22;
 
 R = M/N;
 n = log2(N);

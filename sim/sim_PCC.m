@@ -1,4 +1,4 @@
-function BLER = sim_PCC(PCC_struct, Ebn0, min_errors, L)
+function BLER = sim_PCC(PCC_struct, Ebn0, min_errors, L, force_rate)
     %% Gather information.
     K = PCC_struct.parity_bits_cnt;
     M = PCC_struct.info_bits_cnt;
@@ -9,7 +9,12 @@ function BLER = sim_PCC(PCC_struct, Ebn0, min_errors, L)
     llr_layer_vec = get_llr_layer(N);
     bit_layer_vec = get_bit_layer(N);
     
-    R = M/N;    % code rate.
+    if ~exist('force_rate', 'var') || isempty(force_rate)
+        R = M/N;    % code rate.
+    else
+        R = force_rate;
+    end
+    
     %% Start Simulation.
     % model: Binomial(n,p), To estimate p.
     

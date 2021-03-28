@@ -56,3 +56,17 @@ legend('CRC4', 'CRC6', 'CRC8', 'CRC10', 'CRC12');
 xlabel('K\_PCC');ylabel('BLER');
 set(gca, 'yscale', 'log');
 grid on;
+
+
+%% Plot3: FPGA code performance
+figure(3); hold on; grid on;
+set(gca, 'yscale', 'log');
+load data/FPGA/fpga_N32_first_test.mat;
+plot(Ebn0_arr, simulated_BLERs(1,:), 'rx-');
+plot(Ebn0_arr, simulated_BLERs(2,:), 'bx-');
+
+load data/FPGA/fpga_N32_CA_PC_SCL.mat;
+plot(Ebn0_arr, simulated_BLERs(1,:), 'ro-');
+plot(Ebn0_arr, simulated_BLERs(2,:), 'bo-');
+legend('CA-SCL sim', 'CA-SCL FPGA', 'CA-PC-SCL sim', 'CA-PC-SCL FPGA');
+

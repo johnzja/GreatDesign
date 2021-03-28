@@ -1,3 +1,4 @@
+%% This file generates the performance curves for CA-SCL FPGA decoders.
 addpath('fpga/');
 addpath('fpga/fpga_sim/');
 
@@ -46,5 +47,6 @@ for sel = 1:2
     end
 end
 
-
+%% Save files.
+save('data/FPGA/fpga_N32_first_test.mat');
 
