@@ -31,7 +31,7 @@ Ebn0_arr = [1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0];
 N_Ebn0 = length(Ebn0_arr);
 min_errors = 800;
 amp_factor = 3.5;
-
+T = 8;                              % Flipping attempts.
 simulated_BLERs = zeros(2, N_Ebn0);
 
 % Using parallel-computing between FPGA and computer.
@@ -40,7 +40,7 @@ for sel = 1:2
         case 1
             for ebn0_iter = 1:N_Ebn0
                 Ebn0 = Ebn0_arr(ebn0_iter);
-                simulated_BLERs(sel, ebn0_iter) = sim_PCC_SCLF_given_construction(K_CRC, PCC_conf, N, M, Ebn0, min_errors, L, 0);
+                simulated_BLERs(sel, ebn0_iter) = sim_PCC_SCLF_given_construction(K_CRC, PCC_conf, N, M, Ebn0, min_errors, L, T);
             end
         case 2
             for ebn0_iter = 1:N_Ebn0
@@ -51,5 +51,9 @@ for sel = 1:2
 end
 
 %% Save files.
-save('data/FPGA/fpga_N32_CA_PC_SCL.mat', 'Ebn0_arr', 'info_bits_logical', 'min_errors', 'PCC_conf', 'simulated_BLERs');
+if T == 0
+    save('data/FPGA/fpga_N32_CA_PC_SCL.mat', 'Ebn0_arr', 'info_bits_logical', 'min_errors', 'PCC_conf', 'simulated_BLERs');
+else
+    save('data/FPGA/fpga_N32_CA_PC_SCLF.mat', 'Ebn0_arr', 'info_bits_logical', 'min_errors', 'PCC_conf', 'simulated_BLERs', 'T');
+end
 

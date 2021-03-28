@@ -68,7 +68,7 @@ if ~exist('amp_factor', 'var') || isempty(amp_factor)
     amp_factor = 3.5;
 end
 A = amp_factor;         % LLR Amplification factor in order to increase the accuracy of LLRs in FPGA.
-
+fprintf('Estimating BLER @ Eb/n0=%.2f dB for CRC-PC-Polar SCLF decoder on FPGA.\n', Ebn0);
 
 while cnt_errors < min_errors
     random_bits = (rand([1,M])>0.5);
