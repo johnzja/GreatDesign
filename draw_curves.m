@@ -63,10 +63,18 @@ figure(3); hold on; grid on;
 set(gca, 'yscale', 'log');
 load data/FPGA/fpga_N32_first_test.mat;
 plot(Ebn0_arr, simulated_BLERs(1,:), 'rx-');
-plot(Ebn0_arr, simulated_BLERs(2,:), 'bx-');
+plot(Ebn0_arr, simulated_BLERs(2,:), 'ro-');
 
 load data/FPGA/fpga_N32_CA_PC_SCL.mat;
-plot(Ebn0_arr, simulated_BLERs(1,:), 'ro-');
+plot(Ebn0_arr, simulated_BLERs(1,:), 'bx-');
 plot(Ebn0_arr, simulated_BLERs(2,:), 'bo-');
-legend('CA-SCL sim', 'CA-SCL FPGA', 'CA-PC-SCL sim', 'CA-PC-SCL FPGA');
+
+load data/FPGA/fpga_N32_CA_PC_SCLF.mat;
+plot(Ebn0_arr, simulated_BLERs(1,:), 'gx-');
+plot(Ebn0_arr, simulated_BLERs(2,:), 'go-');
+legend('CA-SCL sim', 'CA-SCL FPGA', 'CA-PC-SCL sim', 'CA-PC-SCL FPGA', 'CA-PC-SCLF sim', ...
+    'CA-PC-SCLF FPGA');
+xlabel('Eb/n0(dB)'); ylabel('BLER');
+
+
 
