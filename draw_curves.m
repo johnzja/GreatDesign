@@ -12,11 +12,11 @@ figure('color',[1 1 1]);
 hold on;
 % Plot the performance of pure Parity-check-concatenated Polar codes.
 load data/compare_flip_with_others/bler_pcc12_t0.mat;
-plot(Ebn0_arr, BLERs, 'kx-');
+plot(Ebn0_arr, BLERs, 'color', [0, 0.5, 1], 'LineStyle', '-', 'marker', 's', 'markersize', 6);
 
 % Plot CRC8-PC8 code under SCL without flipping.
 load data/compare_flip_with_others/bler_crc8_pcc8_t0.mat;
-plot(Ebn0_arr, BLERs, 'mx-');
+plot(Ebn0_arr, BLERs, 'color', [1, 0, 1], 'LineStyle', '-.', 'marker', 'd', 'markersize', 6);
 
 % Plot CRC8-PC8 code under SCLFlip.
 load data/compare_flip_with_others/bler_crc8_pcc8_t32.mat
@@ -29,15 +29,16 @@ ylabel('BLER');
 
 % CRC8-PC4-polar code with flip(T=32).
 load data/compare_flip_with_others/bler_sclf_crc8_pcc4.mat;
-plot(Ebn0_arr, BLERs, 'bx-');
+plot(Ebn0_arr, BLERs, 'color', [0, 0, 1], 'LineStyle', '-', 'marker', 'x', 'markersize', 6);
 
 
 % Without PCC: CASCL v.s. CASCL+Flip(T=32), all using CRC8.
 load data/compare_flip_with_others/bler_crc8_casclf_t0_t32.mat;
-plot(Ebn0_arr, blers_crc8_casclf_t32, 'gx-');
-plot(Ebn0_arr, blers_crc8_cascl, 'gs-');
+plot(Ebn0_arr, blers_crc8_cascl, 'color', [0, 0.5, 0], 'LineStyle', '-.', 'marker', 's', 'markersize', 6);
+plot(Ebn0_arr, blers_crc8_casclf_t32, 'color', [0, 0.5, 0], 'LineStyle', '-', 'marker', 's', 'markersize', 6);
 
-legend('PCC12-SCL', 'CRC8-PC8-SCL', 'CRC8-PC8-SCLF(T=32)', 'CRC8-PC4-SCLF(T=32)', 'CRC8-SCLF(T=32)', 'CRC8-SCL');
+
+legend('PCC12-SCL', 'CRC8-PC8-SCL', 'CRC8-PC8-SCLF(T=32)', 'CRC8-PC4-SCLF(T=32)',  'CRC8-SCL', 'CRC8-SCLF(T=32)');
 set(gca,'FontName','Times New Roman');
 
 %% Plot2: plot the code performance with K_CRC and K_PCC.
