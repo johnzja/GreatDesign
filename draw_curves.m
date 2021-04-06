@@ -22,9 +22,9 @@ plot(Ebn0_arr, BLERs, 'color', [1, 0, 1], 'LineStyle', '-.', 'marker', 'd', 'mar
 load data/compare_flip_with_others/bler_crc8_pcc8_t32.mat
 plot(Ebn0_arr, BLERs, 'rx-');
 
-grid on;
+grid on; box on;
 set(gca, 'yscale', 'log');
-xlabel('Eb/n_0(dB)');
+xlabel('E_b/n_0(dB)');
 ylabel('BLER');
 
 % CRC8-PC4-polar code with flip(T=32).
@@ -74,17 +74,76 @@ grid on;
 figure(4); hold on; grid on;
 set(gca, 'yscale', 'log');
 load data/FPGA/fpga_N32_first_test.mat;
-plot(Ebn0_arr, simulated_BLERs(1,:), 'rx-');    % CA-SCL N=32 R=1/2 simulated.
-plot(Ebn0_arr, simulated_BLERs(2,:), 'ro-');    % CA-SCL N=32 R=1/2 FPGA.
+plot(Ebn0_arr, simulated_BLERs(1,:),  'color', [0, 0.75, 0.9], 'LineStyle', '-', 'marker', 'x', 'markersize', 8); % CA-SCL
+plot(Ebn0_arr, simulated_BLERs(2,:), 'color', [0, 0.75, 0.9], 'LineStyle', '-.', 'marker', 's', 'markersize', 8); % CA-SCL
 
 load data/FPGA/fpga_N32_CA_PC_SCL.mat;
-plot(Ebn0_arr, simulated_BLERs(1,:), 'bx-');    % CA-PC-SCL N=32 R=1/2 PC:hand-constructed simulated.
-plot(Ebn0_arr, simulated_BLERs(2,:), 'bo-');    % CA-PC-SCL N=32 R=1/2 PC:hand-constructed FPGA.
+plot(Ebn0_arr, simulated_BLERs(1,:),'color', [0.8, 0, 1], 'LineStyle', '-', 'marker', 'x', 'markersize', 8);    % CA-PC-SCL N=32 R=1/2 PC:hand-constructed simulated.
+plot(Ebn0_arr, simulated_BLERs(2,:),'color', [0.8, 0, 1], 'LineStyle', '-.', 'marker', 's', 'markersize', 8);   % CA-PC-SCL N=32 R=1/2 PC:hand-constructed FPGA.
 
 load data/FPGA/fpga_N32_CA_PC_SCLF.mat;
-plot(Ebn0_arr, simulated_BLERs(1,:), 'gx-');
-plot(Ebn0_arr, simulated_BLERs(2,:), 'go-');
+plot(Ebn0_arr, simulated_BLERs(1,:), 'color', [0, 0.6, 0], 'LineStyle', '-', 'marker', 'x', 'markersize', 8);   % CA-PC-SCLF sim
+plot(Ebn0_arr, simulated_BLERs(2,:), 'color', [0, 0.6, 0], 'LineStyle', '-.', 'marker', 's', 'markersize', 8);  % CA-PC-SCLF FPGA
 legend('CA-SCL sim', 'CA-SCL FPGA', 'CA-PC-SCL sim', 'CA-PC-SCL FPGA', 'CA-PC-SCLF sim', ...
     'CA-PC-SCLF FPGA');
-xlabel('Eb/n0(dB)'); ylabel('BLER');
+xlabel('E_b/n_0(dB)'); ylabel('BLER');
 set(gca,'FontName','Times New Roman');
+box on;
+
+%% Plot4: Burst-error segment and standard PCC construction.
+N = 512; M = 256;
+addpath('codes/');
+addpath('codes/polar/');
+addpath('codes/polar/GA/');
+
+R=M/N;
+sigma_cc = 1/sqrt(2 * R) * 10^(-0/20);
+[channels, ~] = GA(sigma_cc, N);  
+
+[~, channel_ordered] = sort(channels, 'descend');
+info_bits = sort(channel_ordered(1:M), 'ascend');  
+frozen_bits = ones(N , 1);                             
+frozen_bits(info_bits) = 0;
+info_bits_logical = logical(mod(frozen_bits + 1, 2));
+
+unfrozen_channels = channels(info_bits_logical);
+
+% Draw scatters.
+figure('color', [1,1,1]);
+h = scatter(1:M, 1./(1+exp(unfrozen_channels)), 'b*');
+set(gca, 'yscale', 'log');
+set(gca,'FontName','Times New Roman');
+ylabel('Error probability'); xlabel('Unfrozen bit channel index');
+box on;
+
+% Calculate burst-error segments.
+K = 8;
+must_use = (K+1)*K/2;
+remain = M+K-must_use;
+distribute = floor(remain/K);
+
+burst_err_seg_index = cell(K,1); 
+parity_bits_index = cell(K,1);
+s = 1;
+for k = 1:K-1
+   burst_err_seg_index{k} = (s:s+K-k+distribute);
+   s = s+K-k+1+distribute;
+end
+burst_err_seg_index{K} = (s:M+K);
+
+% Draw vertical dashed lines.
+% figure(6);
+set(gca, 'xlim', [0, M+1]);
+ylim=get(gca,'Ylim');
+hold on;
+for k = 1:K-1
+    s = burst_err_seg_index{k}(end);
+    plot([s,s],ylim,'m--'); 
+end
+
+
+
+
+
+
+
