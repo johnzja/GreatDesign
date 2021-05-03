@@ -23,8 +23,8 @@ design_Ebn0 = 1.5;
 
 PCC = PCC_structs(K_PCC);
 
-% Ebn0_arr = 1.0:0.2:2.4;
-Ebn0_arr = [1.1, 2.5, 2.75];           % All under this Eb/n0.
+%% Setup Simulation run parameters.
+Ebn0_arr = [1, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00];	% All under this Eb/n0.
 min_errors = 1600;
 N_ebn0 = length(Ebn0_arr);
 L = 16;
