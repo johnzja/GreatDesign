@@ -1,4 +1,4 @@
-function BLER = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
+function varargout = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
     %% Setup path references.
     addpath('codes/');
     addpath('codes/polar/');
@@ -70,11 +70,14 @@ function BLER = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
     assert(mod(min_errors, N_parallel) == 0, 'invalid N_parallel!');
     min_errors_each = min_errors / N_parallel;
     N_runs_each = zeros(1, N_parallel);
+    N_trials_each = zeros(1, N_parallel);
     
     parfor p_iter = 1:N_parallel
         N_PCC_SCLF_errs = 0;
         N_runs = 0;
-        
+        N_trials = 0;
+        decoder_info = PCC_CRC_polar_decoder_info;
+
         while N_PCC_SCLF_errs < min_errors_each
             random_bits = (rand([1,M])>0.5);
             CRC_aided_bits = [random_bits, logical(mod(random_bits*PCC_CRC_polar_config.Q_CRC, 2))];  % row vector.
@@ -87,15 +90,17 @@ function BLER = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
             llr_PCC_CRC = 2*y_PCC_CRC/(sigma_sim^2);
 
             % CRC-PCC-Polar SCLF Decoding.
-            polar_info_esti_PCC_CRC = PCC_CRC_SCLF_decoder(llr_PCC_CRC, PCC_CRC_polar_config, PCC_CRC_polar_decoder_info);
-
+            [polar_info_esti_PCC_CRC, decoder_info] = PCC_CRC_SCLF_decoder(...
+                llr_PCC_CRC, PCC_CRC_polar_config, decoder_info);
+            
             % Check correctness of PCC-SCL decoding result.
-            % err_cnt_PCC = sum(xor(random_bits, polar_info_esti_PCC));
             if any(random_bits ~= polar_info_esti_PCC_CRC)
                 N_PCC_SCLF_errs = N_PCC_SCLF_errs+1;  % BLER.
             end
 
             N_runs = N_runs + 1;
+            N_trials = N_trials + 1 + decoder_info.num_flip_trials;
+            
             if mod(N_runs, min_errors) == 0
                 fprintf('Worker %d: Estimating BLER @ Eb/n0=%.2f dB, Complete: %.2f%%\n', ...
                 p_iter, Ebn0, 100*(N_PCC_SCLF_errs / min_errors_each));
@@ -103,7 +108,15 @@ function BLER = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
         end
         
         N_runs_each(p_iter) = N_runs;
+        N_trials_each(p_iter) = N_trials;
     end
     
     BLER = min_errors / sum(N_runs_each);
+    if nargout == 1
+        varargout = {BLER};
+    elseif nargout == 2
+        varargout = {BLER, sum(N_trials_each)/sum(N_runs_each)};
+    else
+        error('%s: invalid num of output arguments.', mfilename);
+    end
 end

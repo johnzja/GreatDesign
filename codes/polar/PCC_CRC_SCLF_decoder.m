@@ -1,4 +1,4 @@
-function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
+function [varargout] = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
 % This function decodes PCC-Polar codes with SCLFlip decoder.
     % Parameters:
     % llr: vector of length N.
@@ -12,13 +12,13 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
     n = log2(N);
     
     %% Extract info from PCC_conf structure.
-    PCC_conf = PCC_CRC_conf.PCC_conf;
+    PCC_conf = PCC_CRC_conf.PCC_conf;               % PCC Configuration structure.
     M = PCC_conf.info_bits_cnt;                     % HERE: M means info bits + CRC bits.
     K = PCC_conf.parity_bits_cnt;
     PCEqns = PCC_conf.parity_bits_index;
     nonfrozen_bits_logical = PCC_conf.nonfrozen_bits_logical;
-    parity_locs_wrt_nonfrozen_bits = zeros(1,K);
-    info_bits_wrt_nonfrozen_logical = true(M+K,1);  % info_bits means info bits w.r.t PCC-polar code.
+    parity_locs_wrt_nonfrozen_bits = zeros(1, K);
+    info_bits_wrt_nonfrozen_logical = true(M+K, 1); % info_bits means info bits w.r.t PCC-polar code.
     
     for k = 1:K
         t = PCEqns{k}(end);
@@ -31,23 +31,20 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
     lambda_offset = decoder_info.lambda_offset;
     bit_layer_vec = decoder_info.bit_layer_vec;
     llr_layer_vec = decoder_info.llr_layer_vec;
-    CS = decoder_info.CS;                   % Previously computed Critical Set. Column vector.
-    T = decoder_info.T;                     % Number of bit-flip trials.
+    CS = decoder_info.CS;                           % Previously computed Critical Set. Column vector.
+    T = decoder_info.T;                             % Number of bit-flip trials.
     historical_u = zeros(M+K, T+1);
     historical_PM = realmax*ones(1,T+1);
     bit_to_flip = -1;
     
     %% Memory declarations.
     for t = 0:T
-        lazy_copy = zeros(n, L);%If Lazy Copy is used, there is no data-copy in the decoding process. We only need to record where the data come from. Here,data refer to LLRs and partial sums.
-        %Lazy Copy is a relatively sophisticated operation for new learners of polar codes. If you do not understand such operation, you can directly copy data.
-        %If you can understand lazy copy and you just start learning polar codes
-        %for just fews days, you are very clever.
+        lazy_copy = zeros(n, L);
         P = zeros(N - 1, L);        % Channel llr is publicly-used, so N - 1 is enough.
-        C = zeros(N - 1, 2 * L);    % I do not esitimate (x1, x2, ... , xN), so N - 1 is enough.
+        C = zeros(N - 1, 2 * L);    % I do not estimate (x1, x2, ... , xN), so N - 1 is enough.
         u = zeros(M+K, L);          % unfrozen bits that polar codes carry, including crc bits.
         PM = zeros(L, 1);           % Path metrics.
-        SC_state = false(N,1);  
+        SC_state = false(N, 1);  
 
         activepath = zeros(L, 1);   % Indicate if the path is active. '1'->active; '0' otherwise.
         cnt_u = 1;                  % information bit counter, from 1 to M+K.
@@ -113,7 +110,7 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
             end
 
             % HERE: down to the leaf of the decoding tree.
-            pcc_eqn_index = find(parity_locs_wrt_nonfrozen_bits==cnt_u,1);
+            pcc_eqn_index = find(parity_locs_wrt_nonfrozen_bits==cnt_u, 1);
 
             if nonfrozen_bits_logical(phi + 1) && isempty(pcc_eqn_index)    
                 % if now we decode an info bit
@@ -205,7 +202,7 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
                         p = mod(sum(u(pcc_eqn,l_index)),2);
 
                         % LLR<0: like 1; LLR>0: like 0.
-                        if ((1-2*p)*P(1, l_index)) < 0    % this bit looks different from p, then add loss to PM.
+                        if ((1-2*p)*P(1, l_index)) < 0  % this bit looks different from p, then add loss to PM.
                             PM(l_index) = PM(l_index) + abs(P(1, l_index));
                         end
 
@@ -222,7 +219,7 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
                         if activepath(l_index) == 0
                             continue;
                         end
-                        if P(1, l_index) < 0    % this bit looks like 1, then add loss to PM.
+                        if P(1, l_index) < 0            % this bit looks like 1, then add loss to PM.
                             PM(l_index) = PM(l_index) - P(1, l_index);
                         end
                         if phi_mod_2 == 0               % odd-indexed frozen bit.
@@ -235,7 +232,7 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
 
             end 
 
-            for l_index = 1 : L%partial-sum return
+            for l_index = 1 : L                         %partial-sum return
                 if activepath(l_index) == 0
                     continue
                 end
@@ -284,6 +281,13 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
             if all(~CRC_check)
                 % Remove CRC bits.
                 polar_info_esti = logical(info_with_CRC(1:end-K_CRC)).';
+                varargout = {polar_info_esti};
+                if nargout == 2
+                    decoder_info.num_flip_trials = t;
+                    varargout{2} = decoder_info;
+                elseif nargout >= 3
+                    error('nargout error!');
+                end
                 return;
             end
         end
@@ -303,6 +307,13 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
                 info_with_CRC = u(:,1); % the most possible one, with the smallest path metric.
                 info_with_CRC = info_with_CRC(info_bits_wrt_nonfrozen_logical);
                 polar_info_esti = logical(info_with_CRC(1:end-K_CRC)).';
+                varargout = {polar_info_esti};
+                if nargout == 2
+                    decoder_info.num_flip_trials = 0;
+                    varargout{2} = decoder_info;
+                elseif nargout >= 3
+                    error('nargout error!');
+                end
                 return;
             end
             
@@ -325,6 +336,13 @@ function polar_info_esti = PCC_CRC_SCLF_decoder(llr, PCC_CRC_conf, decoder_info)
             info_with_CRC = historical_u(:,order(1));
             info_with_CRC = info_with_CRC(info_bits_wrt_nonfrozen_logical);
             polar_info_esti = logical(info_with_CRC(1:end-K_CRC)).';
+            varargout = {polar_info_esti};
+            if nargout == 2
+                decoder_info.num_flip_trials = t;
+                varargout{2} = decoder_info;
+            elseif nargout >= 3
+                error('nargout error!');
+            end
             return;
         end
     end
