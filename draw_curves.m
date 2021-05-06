@@ -14,9 +14,18 @@ hold on;
 load data/compare_flip_with_others/bler_pcc12_t0.mat;
 plot(Ebn0_arr, BLERs, 'color', [0, 0.5, 1], 'LineStyle', '-', 'marker', 's', 'markersize', 6);
 
+% Without PCC: CASCL v.s. CASCL+Flip(T=32), all using CRC8.
+load data/compare_flip_with_others/bler_crc8_casclf_t0_t32.mat;
+plot(Ebn0_arr, blers_crc8_cascl, 'color', [0, 0.5, 0], 'LineStyle', '-.', 'marker', 's', 'markersize', 6);
+plot(Ebn0_arr, blers_crc8_casclf_t32, 'color', [0, 0.5, 0], 'LineStyle', '-', 'marker', 's', 'markersize', 6);
+
 % Plot CRC8-PC8 code under SCL without flipping.
 load data/compare_flip_with_others/bler_crc8_pcc8_t0.mat;
 plot(Ebn0_arr, BLERs, 'color', [1, 0, 1], 'LineStyle', '-.', 'marker', 'd', 'markersize', 6);
+
+% CRC8-PC4-polar code with flip(T=32).
+load data/compare_flip_with_others/bler_sclf_crc8_pcc4.mat;
+plot(Ebn0_arr, BLERs, 'color', [0, 0, 1], 'LineStyle', '-', 'marker', 'x', 'markersize', 6);
 
 % Plot CRC8-PC8 code under SCLFlip.
 load data/compare_flip_with_others/bler_crc8_pcc8_t32.mat
@@ -27,18 +36,8 @@ set(gca, 'yscale', 'log');
 xlabel('E_b/n_0(dB)');
 ylabel('BLER');
 
-% CRC8-PC4-polar code with flip(T=32).
-load data/compare_flip_with_others/bler_sclf_crc8_pcc4.mat;
-plot(Ebn0_arr, BLERs, 'color', [0, 0, 1], 'LineStyle', '-', 'marker', 'x', 'markersize', 6);
 
-
-% Without PCC: CASCL v.s. CASCL+Flip(T=32), all using CRC8.
-load data/compare_flip_with_others/bler_crc8_casclf_t0_t32.mat;
-plot(Ebn0_arr, blers_crc8_cascl, 'color', [0, 0.5, 0], 'LineStyle', '-.', 'marker', 's', 'markersize', 6);
-plot(Ebn0_arr, blers_crc8_casclf_t32, 'color', [0, 0.5, 0], 'LineStyle', '-', 'marker', 's', 'markersize', 6);
-
-
-legend('PCC12-SCL', 'CRC8-PC8-SCL', 'CRC8-PC8-SCLF(T=32)', 'CRC8-PC4-SCLF(T=32)',  'CRC8-SCL', 'CRC8-SCLF(T=32)');
+legend('PCC12-SCL', 'CRC8-SCL', 'CRC8-SCLF(T=32)', 'CRC8-PC8-SCL', 'CRC8-PC4-SCLF(T=32)', 'CRC8-PC8-SCLF(T=32)');
 set(gca,'FontName','Times New Roman');
 
 %% Plot2: plot the code performance with K_CRC and K_PCC.
@@ -78,12 +77,12 @@ plot(Ebn0_arr, simulated_BLERs(1,:),  'color', [0, 0.75, 0.9], 'LineStyle', '-',
 plot(Ebn0_arr, simulated_BLERs(2,:), 'color', [0, 0.75, 0.9], 'LineStyle', '-.', 'marker', 's', 'markersize', 8); % CA-SCL
 
 load data/FPGA/fpga_N32_CA_PC_SCL.mat;
-plot(Ebn0_arr, simulated_BLERs(1,:),'color', [0.8, 0, 1], 'LineStyle', '-', 'marker', 'x', 'markersize', 8);    % CA-PC-SCL N=32 R=1/2 PC:hand-constructed simulated.
-plot(Ebn0_arr, simulated_BLERs(2,:),'color', [0.8, 0, 1], 'LineStyle', '-.', 'marker', 's', 'markersize', 8);   % CA-PC-SCL N=32 R=1/2 PC:hand-constructed FPGA.
+plot(Ebn0_arr, simulated_BLERs(1,:),'color', [0.6, 0, 1], 'LineStyle', '-', 'marker', 'x', 'markersize', 8);    % CA-PC-SCL N=32 R=1/2 PC:hand-constructed simulated.
+plot(Ebn0_arr, simulated_BLERs(2,:),'color', [0.6, 0, 1], 'LineStyle', '-.', 'marker', 's', 'markersize', 8);   % CA-PC-SCL N=32 R=1/2 PC:hand-constructed FPGA.
 
 load data/FPGA/fpga_N32_CA_PC_SCLF.mat;
-plot(Ebn0_arr, simulated_BLERs(1,:), 'color', [0, 0.6, 0], 'LineStyle', '-', 'marker', 'x', 'markersize', 8);   % CA-PC-SCLF sim
-plot(Ebn0_arr, simulated_BLERs(2,:), 'color', [0, 0.6, 0], 'LineStyle', '-.', 'marker', 's', 'markersize', 8);  % CA-PC-SCLF FPGA
+plot(Ebn0_arr, simulated_BLERs(1,:), 'color', [1, 0, 0], 'LineStyle', '-', 'marker', 'x', 'markersize', 8);     % CA-PC-SCLF sim
+plot(Ebn0_arr, simulated_BLERs(2,:), 'color', [1, 0, 0], 'LineStyle', '-.', 'marker', 's', 'markersize', 8);    % CA-PC-SCLF FPGA
 legend('CA-SCL sim', 'CA-SCL FPGA', 'CA-PC-SCL sim', 'CA-PC-SCL FPGA', 'CA-PC-SCLF sim', ...
     'CA-PC-SCLF FPGA');
 xlabel('E_b/n_0(dB)'); ylabel('BLER');
