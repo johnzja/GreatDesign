@@ -171,8 +171,24 @@ for k = 1:K-1
     plot([s,s],ylim,'m--'); 
 end
 
+%% Plot5: Complexity of SCLF decoders.
+load data/test_Ebn0_3.00.mat;
+bler_3 = BLERs; tr_3 = Trial_Rates;
+load data/flip_mean_complexity.mat;
+BLERs(end) = bler_3;
+Trial_Rates(end) = tr_3;
 
+% Plot this curve.
+N_Ebn0 = length(BLERs);
+assert(N_Ebn0 == length(Trial_Rates));
+figure('color', [1,1,1]); hold on;
 
+plot(1:0.25:3, ones(1, N_Ebn0), 'LineStyle', '-', 'marker', 's', 'markersize', 8);
+plot(1:0.25:3, Trial_Rates, 'LineStyle', '-', 'marker', 'x', 'markersize', 8);
+
+set(gca, 'ylim', [0, max(Trial_Rates)]);
+grid on; xlabel('E_b/n_0 (dB)');ylabel('# Trials of SCL-decoding');
+legend('SCL decoder', 'SCLF decoder');
 
 
 
