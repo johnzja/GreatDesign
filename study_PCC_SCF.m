@@ -28,10 +28,10 @@ PCC = PCC_structs(K_PCC);
 % Test at 3.0dB
 Ebn0_arr = [3.00];
 
-min_errors = 1600;
+min_errors = 1200;
 N_ebn0 = length(Ebn0_arr);
 L = 16;
-T = 32;
+T = 16;
 
 BLERs = zeros(1, N_ebn0);
 Trial_Rates = zeros(1, N_ebn0);

@@ -66,7 +66,7 @@ function varargout = sim_PCC_SCLF(K_CRC, K_PCC, N, M, Ebn0, min_errors, L, T)
     fprintf('Estimating BLER @ Eb/n0=%.2f dB for CRC-PCC-Polar SCLF decoder.\n', Ebn0);
     
     % Add parallel support,
-    N_parallel = 25;            
+    N_parallel = 6;            
     assert(mod(min_errors, N_parallel) == 0, 'invalid N_parallel!');
     min_errors_each = min_errors / N_parallel;
     N_runs_each = zeros(1, N_parallel);
