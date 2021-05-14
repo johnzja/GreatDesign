@@ -25,7 +25,7 @@
 % * **************************************************************************
 % * **************************************************************************
 % * *******************      				                ******************
-% * ********************         ·ð×æ±£ÓÓ Ë³Àû±ÏÒµ          *******************
+% * ********************         ï¿½ï¿½ï¿½æ±£ï¿½ï¿½ Ë³ï¿½ï¿½ï¿½ï¿½Òµ          *******************
 % * *********************                                 ********************
 % * **************************************************************************
 
@@ -85,7 +85,7 @@ legend('CRC4', 'CRC6', 'CRC8', 'CRC10', 'CRC12');
 xlabel('K\_PCC');ylabel('BLER');
 set(gca, 'yscale', 'log');
 set(gca,'FontName','Times New Roman');
-grid on;
+grid on; box on;
 
 load data/compare_flip_with_others/CRC-PCC-SCLF_performance_test.mat
 BLERs_f = BLERs;
@@ -97,7 +97,7 @@ legend('CRC4', 'CRC6', 'CRC8', 'CRC10', 'CRC12');
 xlabel('K\_PCC');ylabel('BLER');
 set(gca, 'yscale', 'log');
 set(gca,'FontName','Times New Roman');
-grid on;
+grid on; box on;
 
 
 %% Plot3: FPGA code performance
