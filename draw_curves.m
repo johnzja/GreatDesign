@@ -25,7 +25,7 @@
 % * **************************************************************************
 % * **************************************************************************
 % * *******************      				                ******************
-% * ********************         ���汣�� ˳����ҵ          *******************
+% * ********************         Wish to Graduate          *******************
 % * *********************                                 ********************
 % * **************************************************************************
 
@@ -183,13 +183,11 @@ N_Ebn0 = length(BLERs);
 assert(N_Ebn0 == length(Trial_Rates));
 figure('color', [1,1,1]); hold on;
 
-plot(1:0.25:3, ones(1, N_Ebn0), 'LineStyle', '-', 'marker', 's', 'markersize', 8);
 plot(1:0.25:3, Trial_Rates, 'LineStyle', '-', 'marker', 'x', 'markersize', 8);
+plot(1:0.25:3, ones(1, N_Ebn0), 'LineStyle', '-', 'marker', 's', 'markersize', 8);
 
 set(gca, 'ylim', [0, max(Trial_Rates)]);
 grid on; xlabel('E_b/n_0 (dB)');ylabel('# Trials of SCL-decoding');
-legend('SCL decoder', 'SCLF decoder');
-
-
+legend('SCLF decoder', 'SCL decoder' );
 
 
