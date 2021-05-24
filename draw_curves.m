@@ -79,7 +79,7 @@ BLERs_nf = BLERs;
 figure(2);hold on;
 
 for idx = 1:5
-    plot(K_SCLF_PCC_arr, BLERs_nf(idx, :), 'x-');
+    plot(K_SCLF_PCC_arr, BLERs_nf(idx, :), 's-', 'markersize', 8);
 end
 legend('CRC4', 'CRC6', 'CRC8', 'CRC10', 'CRC12');
 xlabel('K\_PCC');ylabel('BLER');
@@ -91,7 +91,7 @@ load data/compare_flip_with_others/CRC-PCC-SCLF_performance_test.mat
 BLERs_f = BLERs;
 figure(3);hold on;
 for idx = 1:5
-    plot(K_SCLF_PCC_arr, BLERs_f(idx, :), 'x-');
+    plot(K_SCLF_PCC_arr, BLERs_f(idx, :), 'd-', 'markersize', 8);
 end
 legend('CRC4', 'CRC6', 'CRC8', 'CRC10', 'CRC12');
 xlabel('K\_PCC');ylabel('BLER');
@@ -189,7 +189,8 @@ plot(1:0.25:3, Trial_Rates, 'LineStyle', '-', 'marker', 'x', 'markersize', 8);
 set(gca, 'ylim', [0, max(Trial_Rates)]);
 grid on; xlabel('E_b/n_0 (dB)');ylabel('# Trials of SCL-decoding');
 legend('SCL decoder', 'SCLF decoder');
-
+set(gca,'FontName','Times New Roman');
+box on;
 
 
 
