@@ -84,6 +84,7 @@ end
 legend('CRC4', 'CRC6', 'CRC8', 'CRC10', 'CRC12');
 xlabel('K\_PCC');ylabel('BLER');
 set(gca, 'yscale', 'log');
+set(gca, 'ylim', [0.02, 0.1]);
 set(gca,'FontName','Times New Roman');
 grid on; box on;
 
@@ -96,6 +97,7 @@ end
 legend('CRC4', 'CRC6', 'CRC8', 'CRC10', 'CRC12');
 xlabel('K\_PCC');ylabel('BLER');
 set(gca, 'yscale', 'log');
+set(gca, 'ylim', [0.02, 0.1]);
 set(gca,'FontName','Times New Roman');
 grid on; box on;
 
