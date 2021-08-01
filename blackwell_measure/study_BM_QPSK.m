@@ -1,4 +1,7 @@
 %% Study 3-D Blackwell Measure.
+clc;clear;
+addpath('codes/polar/GA/');
+
 P = 1;                  % The constellation power is 2P.
 A = sqrt(P);            % Amplitude on I or Q.
 
@@ -12,7 +15,8 @@ Esn0 = 1.5;             % unit: dB
 % sigma = 0.8;
 sigma = A * (10^(-Esn0/20));
 
-% Do QPSK sampling.
+
+%% Do QPSK sampling.
 N_sample = 10000;
 bm_posterior_coord = zeros(N_sample, 3);
 
@@ -68,7 +72,7 @@ xlabel('x'); ylabel('y'); zlabel('z');
 axis equal;
 
 %% Calculate the exact Blackwell Measure for QPSK-AWGN channel.
-N_bins_each_dim = 2^9;
+N_bins_each_dim = 80;
 bin_centers = linspace(0, 1, N_bins_each_dim);
 % index of the bins: 1 ~ N_bins_each_dim.
 % index0 + index1 <= N + 1.
@@ -137,32 +141,15 @@ for idx_i = 1:Nb
         s1 = s1 / s;
         s2 = s2 / s;
         s3 = s3 / s;
-        
-        % Calculate the bm-coordinate.
-        idx0 = 1+round((N_bins_each_dim-1)*s0);
-        idx1 = 1+round((N_bins_each_dim-1)*s1);
-        idx2 = 1+round((N_bins_each_dim-1)*s2);
-        idx3 = 1+round((N_bins_each_dim-1)*s3);
+       
         
 %         if idx0+idx1 > 1+N_bins_each_dim
 %             error('?');
 %         elseif idx0+idx1+idx2 > 2+N_bins_each_dim
 %             error('??');    % This is impossible! While it happened.....
 %         end
-        if idx0 + idx1 + idx2 + idx3 > 3 + N_bins_each_dim
-            d = idx0 + idx1 + idx2 + idx3 - 3 - N_bins_each_dim;
-            [~, M_index] = max([idx0, idx1, idx2, idx3]);
-            switch M_index
-                case 1
-                    idx0 = idx0 - d;
-                case 2
-                    idx1 = idx1 - d;
-                case 3
-                    idx2 = idx2 - d;
-                case 4
-                    idx3 = idx3 - d;
-            end
-        end
+% This is not a reasonable solution.
+        [idx0, idx1, idx2, idx3] = convert_dist_into_index([s0, s1, s2, s3], N_bins_each_dim);
         
         bm_dist(idx0, idx1, idx2) = bm_dist(idx0, idx1, idx2) + (p^2)/4;
         bm_dist(idx1, idx2, idx3) = bm_dist(idx1, idx2, idx3) + (p^2)/4;
@@ -174,51 +161,18 @@ end
 %% Display bm_dist using 3D density plot...
 
 I_theoretical = log2(1+(A/sigma)^2);        % Maximum value achievable.
-fprintf('theoretical AWGNC Gaussian-input I = %f bits\n', I_theoretical);
-I = get_I(bm_dist, bin_centers);
-fprintf('BM I = %f bits\n', I);
+fprintf('Theoretical AWGNC Gaussian-input I = %f bits/ch.use\n\n', I_theoretical);
 
-%% Utils.
-function I = get_I(bm_dist, bin_centers)
-    [~, ~, Nbins] = size(bm_dist);
-    assert(Nbins == length(bin_centers));
-    
-    I = 0;
-    p_total = 0;
-    for idx0 = 1:Nbins
-        for idx1 = 1:(Nbins+1-idx0)
-            p_total_layer1 = 0;
-            I_layer1 = 0;
-            
-            for idx2 = 1:(Nbins+2-idx0-idx1)
-                s0 = bin_centers(idx0);
-                s1 = bin_centers(idx1);
-                s2 = bin_centers(idx2);
-                s3 = 1-s0-s1-s2;
-                
-                Ip = 2;
-                if s0 > 0
-                    Ip = Ip + s0 * log2(s0);
-                end
-                if s1 > 0
-                    Ip = Ip + s1 * log2(s1);
-                end
-                if s2 > 0
-                    Ip = Ip + s2 * log2(s2);
-                end
-                if s3 > 0
-                    Ip = Ip + s3 * log2(s3);
-                end
-                
-                p_total_layer1 = p_total_layer1 + bm_dist(idx0, idx1, idx2);
-                I_layer1 = I_layer1 + Ip * bm_dist(idx0, idx1, idx2);
-            end
-            
-            p_total = p_total + p_total_layer1;
-            I = I + I_layer1;
-        end
-    end
+I_QPSK = 2*Capacity_Binary_AWGN(A, sigma);
+fprintf('Theoretical QPSK channel I = %f bits/ch.use\n\n', I_QPSK);
 
-    fprintf('Total mass = %f\n', p_total);
-end
+I = get_I_4D(bm_dist, bin_centers);
+fprintf('BM I = %f bits\n\n', I);
+
+
+%% Plot!
+plot_BM(bm_dist, bin_centers);
+
+
+
 
