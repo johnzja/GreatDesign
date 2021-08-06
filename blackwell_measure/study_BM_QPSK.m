@@ -72,7 +72,7 @@ xlabel('x'); ylabel('y'); zlabel('z');
 axis equal;
 
 %% Calculate the exact Blackwell Measure for QPSK-AWGN channel.
-N_bins_each_dim = 80;
+N_bins_each_dim = 32;
 bin_centers = linspace(0, 1, N_bins_each_dim);
 % index of the bins: 1 ~ N_bins_each_dim.
 % index0 + index1 <= N + 1.
@@ -142,13 +142,6 @@ for idx_i = 1:Nb
         s2 = s2 / s;
         s3 = s3 / s;
        
-        
-%         if idx0+idx1 > 1+N_bins_each_dim
-%             error('?');
-%         elseif idx0+idx1+idx2 > 2+N_bins_each_dim
-%             error('??');    % This is impossible! While it happened.....
-%         end
-% This is not a reasonable solution.
         [idx0, idx1, idx2, idx3] = convert_dist_into_index([s0, s1, s2, s3], N_bins_each_dim);
         
         bm_dist(idx0, idx1, idx2) = bm_dist(idx0, idx1, idx2) + (p^2)/4;

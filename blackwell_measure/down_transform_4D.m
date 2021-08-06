@@ -31,7 +31,7 @@ function ret_dist = down_transform_4D(dist_1, dist_2, bin_centers, GF_info)
                                 r = [0, 0, 0, 0];
                                 for u2 = 1:4
                                     % x1 = u1 + alpha*u2.
-                                    x1 = add_table(idx_r, mult_table(u2, alpha));
+                                    x1 = add_table(u1, mult_table(u2, alpha));
                                     x2 = u2;
                                     r(u2) = s(x1) * t(x2);
                                 end

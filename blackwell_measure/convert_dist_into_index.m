@@ -5,6 +5,7 @@ idx1 = 1+round((Nbins-1)*s(2));
 idx2 = 1+round((Nbins-1)*s(3));
 idx3 = 1+round((Nbins-1)*s(4));
 
+% HERE: The 3-D quantization method has some bugs.
 if idx0 + idx1 + idx2 + idx3 > 3 + Nbins
     d = idx0 + idx1 + idx2 + idx3 - 3 - Nbins;
     [~, M_index] = max([idx0, idx1, idx2, idx3]);

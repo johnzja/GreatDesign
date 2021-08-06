@@ -63,9 +63,7 @@ function ret_dist = up_transform_4D(dist_1, dist_2, bin_centers, GF_info)
                 end
             end
         end
-        printf('Finish first iter');
+        fprintf('Finish first iter\n');
     end
     
-
-
 end
