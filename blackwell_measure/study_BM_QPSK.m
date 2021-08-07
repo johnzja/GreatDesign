@@ -72,7 +72,7 @@ xlabel('x'); ylabel('y'); zlabel('z');
 axis equal;
 
 %% Calculate the exact Blackwell Measure for QPSK-AWGN channel.
-N_bins_each_dim = 32;
+N_bins_each_dim = 64;
 bin_centers = linspace(0, 1, N_bins_each_dim);
 % index of the bins: 1 ~ N_bins_each_dim.
 % index0 + index1 <= N + 1.
@@ -145,11 +145,12 @@ for idx_i = 1:Nb
         [idx0, idx1, idx2, idx3] = convert_dist_into_index([s0, s1, s2, s3], N_bins_each_dim);
         
         bm_dist(idx0, idx1, idx2) = bm_dist(idx0, idx1, idx2) + (p^2)/4;
-        bm_dist(idx1, idx2, idx3) = bm_dist(idx1, idx0, idx3) + (p^2)/4;
+        bm_dist(idx1, idx0, idx3) = bm_dist(idx1, idx0, idx3) + (p^2)/4;
         bm_dist(idx2, idx3, idx0) = bm_dist(idx2, idx3, idx0) + (p^2)/4;
-        bm_dist(idx3, idx0, idx1) = bm_dist(idx3, idx2, idx1) + (p^2)/4;
+        bm_dist(idx3, idx2, idx1) = bm_dist(idx3, idx2, idx1) + (p^2)/4;
     end
 end
+fprintf('Construct QPSK BM complete!\n');
 
 %% Display bm_dist using 3D density plot...
 I_theoretical = log2(1+(A/sigma)^2);            % Maximum value achievable.
@@ -209,7 +210,7 @@ for idx0 = 1:N_bins_each_dim
     end
 end
 
-
+fprintf('Sym BM I = %f\n', I);
 %% Plot!
 plot_BM(bm_dist, bin_centers);
 

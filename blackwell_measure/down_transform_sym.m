@@ -1,4 +1,4 @@
-function ret_dist = up_transform_sym(dist_1, dist_2, bin_centers, GF_info)
+function ret_dist = down_transform_sym(dist_1, dist_2, bin_centers, GF_info)
     [~, ~, Nbins] = size(dist_1);
     assert(all(size(dist_1) == size(dist_2)));
     assert(Nbins == length(bin_centers));
@@ -39,6 +39,8 @@ function ret_dist = up_transform_sym(dist_1, dist_2, bin_centers, GF_info)
                 end
 
                 p = [bin_centers(idx1_0), bin_centers(idx1_1),bin_centers(idx1_2),bin_centers(idx1_3)].';
+                pc2 = [p(1), p(3), p(4), p(2)].';
+                
                 bm_dist_2_visited = false(Nbins, Nbins,Nbins);
                 
                 % Go on to fetch blackwell-measure distribution 2.
@@ -74,25 +76,35 @@ function ret_dist = up_transform_sym(dist_1, dist_2, bin_centers, GF_info)
                             
                             q = [bin_centers(idx2_0), bin_centers(idx2_1),bin_centers(idx2_2),bin_centers(idx2_3)].';
                             
-                            % Perform up-polarization.
-                            qc      = [q(1),q(4),q(2),q(3)].';
-                            qcab    = [q(4),q(1),q(3),q(2)].';
-                            qcab3   = [q(2),q(3),q(1),q(4)].';
-                            qcb2    = [q(3),q(2),q(4),q(1)].';
-
-                            pWn = [p.'*qc, p.'*qcab, p.'*qcab3, p.'*qcb2].';
-                            [idx_Wn_0, idx_Wn_1, idx_Wn_2, idx_Wn_3] = convert_dist_into_index(pWn, Nbins);
+                            % Perform down-polarization.
+                            qab     = [q(2), q(1), q(4), q(3)].';
+                            qab3    = [q(3), q(4), q(1), q(2)].';
+                            qb2     = [q(4), q(3), q(2), q(1)].';
                             
+                            v = zeros(4,4);
+                            v(:,1) = pc2 .* q;
+                            v(:,2) = pc2 .* qab;
+                            v(:,3) = pc2 .* qab3;
+                            v(:,4) = pc2 .* qb2;
+                            
+                            lambdas = sum(v);
                             ch_prob = p1 * p2/4;
-                            ret_dist(idx_Wn_0, idx_Wn_1, idx_Wn_2) = ret_dist(idx_Wn_0, idx_Wn_1, idx_Wn_2) + ch_prob;
-                            ret_dist(idx_Wn_1, idx_Wn_0, idx_Wn_3) = ret_dist(idx_Wn_1, idx_Wn_0, idx_Wn_3) + ch_prob;
-                            ret_dist(idx_Wn_2, idx_Wn_3, idx_Wn_0) = ret_dist(idx_Wn_2, idx_Wn_3, idx_Wn_0) + ch_prob;
-                            ret_dist(idx_Wn_3, idx_Wn_2, idx_Wn_1) = ret_dist(idx_Wn_3, idx_Wn_2, idx_Wn_1) + ch_prob;
+                            
+                            for idx = 1:4
+                                if lambdas(idx) > 0
+                                    pvec = v(:,idx) / lambdas(idx);
+                                    [idx_Wp_0, idx_Wp_1, idx_Wp_2, idx_Wp_3] = convert_dist_into_index(pvec, Nbins);
+                                    ret_dist(idx_Wp_0, idx_Wp_1, idx_Wp_2) = ret_dist(idx_Wp_0, idx_Wp_1, idx_Wp_2) + ch_prob*lambdas(idx);
+                                    ret_dist(idx_Wp_1, idx_Wp_0, idx_Wp_3) = ret_dist(idx_Wp_1, idx_Wp_0, idx_Wp_3) + ch_prob*lambdas(idx);
+                                    ret_dist(idx_Wp_2, idx_Wp_3, idx_Wp_0) = ret_dist(idx_Wp_2, idx_Wp_3, idx_Wp_0) + ch_prob*lambdas(idx);
+                                    ret_dist(idx_Wp_3, idx_Wp_2, idx_Wp_1) = ret_dist(idx_Wp_3, idx_Wp_2, idx_Wp_1) + ch_prob*lambdas(idx);
+                                    
+                                end
+                            end
                         end
                     end
                 end
             end
         end
     end
-
 end
