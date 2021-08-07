@@ -145,22 +145,69 @@ for idx_i = 1:Nb
         [idx0, idx1, idx2, idx3] = convert_dist_into_index([s0, s1, s2, s3], N_bins_each_dim);
         
         bm_dist(idx0, idx1, idx2) = bm_dist(idx0, idx1, idx2) + (p^2)/4;
-        bm_dist(idx1, idx2, idx3) = bm_dist(idx1, idx2, idx3) + (p^2)/4;
+        bm_dist(idx1, idx2, idx3) = bm_dist(idx1, idx0, idx3) + (p^2)/4;
         bm_dist(idx2, idx3, idx0) = bm_dist(idx2, idx3, idx0) + (p^2)/4;
-        bm_dist(idx3, idx0, idx1) = bm_dist(idx3, idx0, idx1) + (p^2)/4;
+        bm_dist(idx3, idx0, idx1) = bm_dist(idx3, idx2, idx1) + (p^2)/4;
     end
 end
 
 %% Display bm_dist using 3D density plot...
-
-I_theoretical = log2(1+(A/sigma)^2);        % Maximum value achievable.
-fprintf('Theoretical AWGNC Gaussian-input I = %f bits/ch.use\n\n', I_theoretical);
+I_theoretical = log2(1+(A/sigma)^2);            % Maximum value achievable.
+fprintf('Theoretical AWGNC Gaussian-input I = %f bits/ch.use\n', I_theoretical);
 
 I_QPSK = 2*Capacity_Binary_AWGN(A, sigma);
-fprintf('Theoretical QPSK channel I = %f bits/ch.use\n\n', I_QPSK);
+fprintf('Theoretical QPSK channel I = %f bits/ch.use\n', I_QPSK);
 
 I = get_I_4D(bm_dist, bin_centers);
 fprintf('BM I = %f bits\n\n', I);
+
+% Decomposition: Decompose into 4-ary symmetric channels and evaluate the
+% capacity.
+bm_dist_visited = false(N_bins_each_dim,N_bins_each_dim,N_bins_each_dim);
+I = 0;
+total_mass = 0;
+
+for idx0 = 1:N_bins_each_dim
+    for idx1 = 1:(N_bins_each_dim+1-idx0)
+        for idx2 = 1:(N_bins_each_dim+2-idx0-idx1)
+            idx3 = N_bins_each_dim+3-idx0-idx1-idx2;
+            
+            b0 = bm_dist_visited(idx0, idx1, idx2);
+            b1 = bm_dist_visited(idx1, idx0, idx3);
+            b2 = bm_dist_visited(idx2, idx3, idx0);
+            b3 = bm_dist_visited(idx3, idx2, idx1);
+            if any([b0,b1,b2,b3])
+                assert(all([b0,b1,b2,b3]));
+                continue;
+            end
+            
+            t0 = bm_dist(idx0, idx1, idx2);
+            t1 = bm_dist(idx1, idx0, idx3);
+            t2 = bm_dist(idx2, idx3, idx0);
+            t3 = bm_dist(idx3, idx2, idx1);
+            
+            bm_dist_visited(idx0, idx1, idx2)=true;
+            bm_dist_visited(idx1, idx0, idx3)=true;
+            bm_dist_visited(idx2, idx3, idx0)=true;
+            bm_dist_visited(idx3, idx2, idx1)=true;
+           
+            proba = t0+t1+t2+t3;
+            if proba == 0
+                continue;
+            end
+            
+            Iq = 2;
+            p = [bin_centers(idx0), bin_centers(idx1),bin_centers(idx2),bin_centers(idx3)].';
+            for k = 1:4
+                if p(k) > 0
+                    Iq = Iq + p(k)*log2(p(k));
+                end
+            end
+            I = I + Iq * proba;
+            total_mass = total_mass + proba;
+        end
+    end
+end
 
 
 %% Plot!
