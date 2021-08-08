@@ -1,6 +1,6 @@
 
 % addpath(strrep('D:\iTsinghua\Major\github_syncs\Encoding\PolarCpp\PolarCpp\x64\Debug', '\', '/'));
-addpath(strrep('D:\iTsinghua\Major\github_syncs\Encoding\PolarCpp\PolarCpp\x64\Debug', '\', '/'));
+addpath(strrep('D:\iTsinghua\Major\github_syncs\Encoding\PolarCpp\PolarCpp\x64\Release', '\', '/'));
 
 GF_info.alpha = 2;
 GF_info.mult_table  = [0, 0, 0, 0; 0, 1, 2, 3; 0, 2, 3, 1; 0, 3, 1, 2];
@@ -25,11 +25,12 @@ tic;
 Wn = bm_polar_transform(bm_dist, bm_dist, bin_centers, GF_info, true);
 toc;
 
-% tic;
-% Wn_r = up_transform_4D(bm_dist, bm_dist, bin_centers, GF_info);
-% toc;
+tic;
+Wn_r = down_transform_sym(bm_dist, bm_dist, bin_centers, GF_info);
+toc;
 
-
+%% TEST.
+d = sum(sum(sum(abs(Wn-Wn_r))))
 
 
 

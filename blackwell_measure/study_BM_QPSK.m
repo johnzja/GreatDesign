@@ -211,6 +211,8 @@ for idx0 = 1:N_bins_each_dim
 end
 
 fprintf('Sym BM I = %f\n', I);
+
+
 %% Plot!
 plot_BM(bm_dist, bin_centers);
 
