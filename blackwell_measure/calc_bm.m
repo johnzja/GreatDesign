@@ -1,6 +1,13 @@
 GF_info.alpha = 2;
 GF_info.mult_table  = [0, 0, 0, 0; 0, 1, 2, 3; 0, 2, 3, 1; 0, 3, 1, 2];
 GF_info.add_table   = [0, 1, 2, 3; 1, 0, 3, 2; 2, 3, 0, 1; 3, 2, 1, 0];
+GF_info.kernel_index_vec0 = kernel_index_vec0;          % boolean vector.
+GF_info.kernel_index_vec1 = int32(kernel_index_vec1);   % int32 vector.
+GF_info.kernel_index_mat0 = int32(kernel_index_mat0);   % int32 matrix.
+GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
+
+GF_info.num_threads = 6;
+GF_info.jobs_each_thread = 4;
 
 n = 7;
 N = 2^n;
@@ -22,7 +29,7 @@ for layer = 1:n
     this_layer_time_n = zeros(2^(layer-1),1);
     this_layer_time_p = zeros(2^(layer-1),1);
     
-    parfor idx = 1:(2^(layer-1))
+    for idx = 1:(2^(layer-1))
         bm_temp = last_layer{idx};
         tic;
         Wn = bm_polar_transform(bm_temp, bm_temp, bin_centers, GF_info, false);

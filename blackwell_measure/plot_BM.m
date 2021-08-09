@@ -47,14 +47,31 @@ Z = Z(non_zero_logical);
 S = S(non_zero_logical);
 C = C(non_zero_logical);
 
-figure;
+set(0,'DefaultLineMarkerSize',4);
+set(0,'DefaultTextFontSize',14);
+
+set(0,'DefaultAxesFontSize',12);
+set(0,'DefaultLineLineWidth',1.4);
+
+set(0,'defaultfigurecolor','w');
+figure('color',[1 1 1]);
 
 cmap = hot(256);
 cmap = cmap(256:-1:1,:);
 colormap(cmap);
-scatter3(X, Y, Z, S, C);
+scatter3(X, Y, Z, S, C); hold on;
+
+line([0, v0(1)], [0, v0(2)], [0, v0(3)], 'Color', 'red');
+line([0, v1(1)], [0, v1(2)], [0, v1(3)], 'Color', 'red');
+line([0, v2(1)], [0, v2(2)], [0, v2(3)], 'Color', 'red');
+
+line([v0(1), v1(1)], [v0(2), v1(2)], [v0(3), v1(3)], 'Color', 'red');
+line([v1(1), v2(1)], [v1(2), v2(2)], [v1(3), v2(3)], 'Color', 'red');
+line([v2(1), v0(1)], [v2(2), v0(2)], [v2(3), v0(3)], 'Color', 'red');
+
 xlabel('x');
 ylabel('y');
 zlabel('z');
+colorbar;
 
 end
