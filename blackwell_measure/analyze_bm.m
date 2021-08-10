@@ -71,7 +71,7 @@ for idx = 1:N_Ebn0
 end
 
 
-save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M', 'm');
+save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M');
 
 %% N512 binary code.
 N = 512;
@@ -124,7 +124,7 @@ for idx = 1:N_Ebn0
     BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical, Ebn0, min_errors, L, GF_info);
 end
 
-save('data/ga_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M', 'm');
+save('data/ga_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M');
 
 %% Plot
 figure;
@@ -134,9 +134,12 @@ plot(Ebn0_arr, BLERs, 'rs-'); hold on;
 load data/ga_construction_q2_L16.mat;
 plot(Ebn0_arr, BLERs, 'bs-');
 
+load data/ga_construction_q4_L16.mat;
+plot(Ebn0_arr, BLERs, 'gs-');
+
 set(gca, 'yscale', 'log');
 xlabel('Eb/n0(dB)');ylabel('BLER'); grid on;
-legend('Q4 SCL16 N256 R0.5', 'Binary SCL16 N512 R0.5');
+legend('Q4 SCL16 N256 BM', 'Binary SCL16 N512 GA', 'Q4 SCL16 N256 GA');
 
 
 
