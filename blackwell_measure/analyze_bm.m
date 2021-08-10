@@ -1,4 +1,4 @@
-load('C:/Users/John Zhu/Desktop/instant_files/bm/bm_p128_N256.mat');
+load('bm_p128_N256.mat');
 fprintf('Load BM data complete.\n');
 
 %% Get capacities.
@@ -53,8 +53,6 @@ GF_info.kernel_index_vec1 = int32(kernel_index_vec1);   % int32 vector.
 GF_info.kernel_index_mat0 = int32(kernel_index_mat0);   % int32 matrix.
 GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
 
-
-Ebn0 = 1.5;
 L = 16;
 
 addpath('sim/');
@@ -67,8 +65,9 @@ N_Ebn0 = length(Ebn0_arr);
 BLERs = zeros(1, N_Ebn0);
 
 for idx = 1:N_Ebn0
+    Ebn0 = Ebn0_arr(idx);
     BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical, Ebn0, min_errors, L, GF_info);
 end
 
 
-save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M', 'm');
+save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M');
