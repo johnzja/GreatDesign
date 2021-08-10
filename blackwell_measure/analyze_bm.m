@@ -53,8 +53,7 @@ GF_info.kernel_index_vec1 = int32(kernel_index_vec1);   % int32 vector.
 GF_info.kernel_index_mat0 = int32(kernel_index_mat0);   % int32 matrix.
 GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
 
-
-Ebn0 = 1.5;
+%% Blackwell-measure construction.
 L = 16;
 
 addpath('sim/');
@@ -67,8 +66,77 @@ N_Ebn0 = length(Ebn0_arr);
 BLERs = zeros(1, N_Ebn0);
 
 for idx = 1:N_Ebn0
+    Ebn0 = Ebn0_arr(idx);
     BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical, Ebn0, min_errors, L, GF_info);
 end
 
 
 save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M', 'm');
+
+%% N512 binary code.
+N = 512;
+M = 256;
+L = 16;
+
+addpath('codes/polar/GA/');
+[channels, ~] = GA(sigma, N);
+[~, order_GA] = sort(channels, 'descend');
+info_bits = sort(order_GA(1 : M), 'ascend');
+info_bits_logical = false(1,N);
+info_bits_logical(info_bits) = true;
+frozen_bits = ~info_bits_logical;
+
+Ebn0_arr = [1.25, 1.5, 1.75, 2.00, 2.25, 2.5, 2.75, 3.00];
+min_errors = 1602;
+N_Ebn0 = length(Ebn0_arr);
+BLERs = zeros(1, N_Ebn0);
+
+for idx = 1:N_Ebn0
+    Ebn0 = Ebn0_arr(idx);
+    BLERs(idx) = sim_SCL(N,M,info_bits_logical, Ebn0, min_errors, L);
+end
+
+disp('Binary code sim complete.');
+
+%% Use Gaussian-Approximation to construct 4-ary code.
+N = 256;
+M = 128;
+L = 16;
+
+addpath('codes/polar/GA/');
+[channels, ~] = GA(sigma, N);
+[~, order_GA] = sort(channels, 'descend');
+info_bits = sort(order_GA(1 : M), 'ascend');
+info_bits_logical = false(1,N);
+info_bits_logical(info_bits) = true;
+frozen_bits = ~info_bits_logical;
+
+
+% if code rate=1/2, in QPSK channel Es/n0 = Eb/n0.
+% simulation.
+Ebn0_arr = [1.25, 1.5, 1.75, 2.00, 2.25, 2.5, 2.75, 3.00];
+min_errors = 1600;
+N_Ebn0 = length(Ebn0_arr);
+BLERs = zeros(1, N_Ebn0);
+
+for idx = 1:N_Ebn0
+    Ebn0 = Ebn0_arr(idx);
+    BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical, Ebn0, min_errors, L, GF_info);
+end
+
+save('data/ga_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M', 'm');
+
+%% Plot
+figure;
+load data/bm_construction_q4_L16.mat;
+plot(Ebn0_arr, BLERs, 'rs-'); hold on;
+
+load data/ga_construction_q2_L16.mat;
+plot(Ebn0_arr, BLERs, 'bs-');
+
+set(gca, 'yscale', 'log');
+xlabel('Eb/n0(dB)');ylabel('BLER'); grid on;
+legend('Q4 SCL16 N256 R0.5', 'Binary SCL16 N512 R0.5');
+
+
+
