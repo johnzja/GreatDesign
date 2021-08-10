@@ -31,17 +31,9 @@ M = 128;
 R = M/N;
 
 info_syms = sort(order(1:M), 'ascend').';
-
-% construct code by binary Gaussian-Approximation (GA).
-% compare with GA.
-addpath('codes/polar/GA/');
-[channels, ~] = GA(sigma, N);  
-
-[~, order_GA] = sort(channels, 'descend');
-info_bits = sort(order_GA(1 : M), 'ascend'); 
-info_bits_logical = false(1,N);
-info_bits_logical(info_bits) = true;
-frozen_bits = ~info_bits_logical;
+info_bits_logical_BM = false(1,N);
+info_bits_logical_BM(info_syms) = true;
+fprintf('BM Code construction: Complete.\n');
 
 %% Required simulation.
 GF_info.m = 2;          % GF(2^2).
@@ -67,11 +59,10 @@ BLERs = zeros(1, N_Ebn0);
 
 for idx = 1:N_Ebn0
     Ebn0 = Ebn0_arr(idx);
-    BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical, Ebn0, min_errors, L, GF_info);
+    BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical_BM, Ebn0, min_errors, L, GF_info);
 end
 
-
-save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M');
+save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical_BM', 'N', 'M');
 
 %% N512 binary code.
 N = 512;
