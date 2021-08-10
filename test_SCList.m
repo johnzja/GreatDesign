@@ -45,6 +45,18 @@ toc;
 disp(['Using MATLAB: BLER = ', num2str(err_cnt/N_runs)]);
 
 %% using cpp.
+N = 512;
+M = 256;
+
+addpath('codes/polar/GA/');
+[channels, ~] = GA(sigma, N);  
+
+[~, order_GA] = sort(channels, 'descend');
+info_bits = sort(order_GA(1 : M), 'ascend'); 
+info_bits_logical = false(1,N);
+info_bits_logical(info_bits) = true;
+frozen_bits = ~info_bits_logical;
+
 err_cnt = 0;
 N_runs = 0;
 

@@ -1,4 +1,4 @@
-function BLER = sim_Qary_SCL(N, M, partially_frozen, info_syms, Ebn0, min_errors, L, GF_info)
+function BLER = sim_SCL(N, M, info_bits_logical, Ebn0, min_errors, L)
 % addpath(strrep('D:\iTsinghua\Major\github_syncs\Encoding\PolarCpp\PolarCpp\x64\Release', '\', '/'));
 addpath('../PolarCpp/PolarCpp/Release/');
 addpath('codes/polar/');
@@ -6,24 +6,14 @@ addpath('codes/polar/');
 %% Setup simulation parameters.
 R = M/N;
 n = log2(N);
+sigma_sim = 1/sqrt(2*R)*(10^(-Ebn0/20));
+frozen_bits = ~info_bits_logical;
 
-Esn0 = Ebn0 + 10*log10(GF_info.m*R);
-sigma = (10^(-Esn0/20));
-fprintf('Estimating BLER @ Eb/n0=%.2f dB for Q-ary SCL decoder.\n', Ebn0);
-
-bpsk_mat = [1,1; -1,1; 1,-1; -1,-1]; % (I,Q).
-m = GF_info.m;
-pwrs = 2.^(0:m-1);
-
-if ~partially_frozen
-    frozen_bits = ~info_syms;
-else
-    error('partially-frozen SCL is not supported yet!');
-end
+fprintf('Estimating BLER @ Eb/n0=%.2f dB for Binary SCL decoder.\n', Ebn0);
 
 % Setup mex-decoder.
 decoder_config.partially_frozen = false;
-decoder_config.is_qary          = true;
+decoder_config.is_qary          = false;
 decoder_config.is_LLR           = true;
 decoder_config.is_Genie         = false;
 decoder_config.update_decoder   = true;       % it can be automatically modified into false.
@@ -31,7 +21,7 @@ decoder_config.is_list          = true;
 decoder_config.L                = L;
 
 % Setup parallel parameters.
-N_parallel = 25;
+N_parallel = 6;
 assert(mod(min_errors, N_parallel) == 0, 'invalid N_parallel!');
 min_errors_each = min_errors / N_parallel;
 N_runs_each = zeros(1, N_parallel);
@@ -41,30 +31,20 @@ parfor p_iter = 1:N_parallel
     N_runs = 0;
     N_SCL_errs = 0;
     while N_SCL_errs < min_errors_each
-        random_syms = randi([0, 2^m-1], [1, M]);
+        random_bits = rand([1,M])>0.5;
         u = zeros(1, N);
-        u(info_syms) = random_syms;
-        x = GF_polar_encoder(u, n, GF_info);
-
-        x_bpsk = bpsk_mat(x+1,:).';
-        x_bpsk = x_bpsk(:).';
+        u(info_bits_logical) = random_bits;
+        x = my_polar_encoder(u,n);
 
         % add AWGN noise.
-        noise_vec = randn([1, N*m]);
-        y = x_bpsk + noise_vec*sigma;
-        llr = 2*y/sigma^2;
+        x_bpsk = 1-2*x;
+        noise_vec = sigma_sim * randn([1,N]);
+        y = x_bpsk + noise_vec;
+        llr = 2*y/sigma_sim^2;
 
         % call mex decoder.
-        polar_info_esti = Qary_SC_Decoder(llr, N, m, frozen_bits, GF_info.alpha, decoder_config);
-
-        % convert into symbols.
-        info_esti = zeros(1, M);
-        for idx = 1:M
-            sym_bits = polar_info_esti(1+(idx-1)*m:2+(idx-1)*m);
-            info_esti(idx) = sym_bits * pwrs.';
-        end
-
-        e = any(info_esti ~= random_syms);
+        polar_info_esti = Qary_SC_Decoder(llr, N, 1, frozen_bits, 0, decoder_config);
+        e = any(polar_info_esti ~= random_bits);
             
         if e
             N_SCL_errs = N_SCL_errs+1;
