@@ -1,3 +1,4 @@
+fprintf('Start loading BM data...\n');
 load('bm_p128_N256.mat');
 fprintf('Load BM data complete.\n');
 
@@ -20,7 +21,6 @@ end
 
 I_total = sum(C);
 
-%% 
 total_capacity_error = (I_total - N*I)/(N*I);
 fprintf('Total capacity error = %.2f %%\n', total_capacity_error*100);
 
@@ -35,25 +35,23 @@ info_bits_logical_BM = false(1,N);
 info_bits_logical_BM(info_syms) = true;
 fprintf('BM Code construction: Complete.\n');
 
-%% Required simulation.
+%% Required simulation. Blackwell-measure construction.
 GF_info.m = 2;          % GF(2^2).
 GF_info.alpha = 2;
 GF_info.mult_table  = [0, 0, 0, 0; 0, 1, 2, 3; 0, 2, 3, 1; 0, 3, 1, 2];
 GF_info.add_table   = [0, 1, 2, 3; 1, 0, 3, 2; 2, 3, 0, 1; 3, 2, 1, 0];
-GF_info.kernel_index_vec0 = kernel_index_vec0;          % boolean vector.
-GF_info.kernel_index_vec1 = int32(kernel_index_vec1);   % int32 vector.
-GF_info.kernel_index_mat0 = int32(kernel_index_mat0);   % int32 matrix.
-GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
+% GF_info.kernel_index_vec0 = kernel_index_vec0;          % boolean vector.
+% GF_info.kernel_index_vec1 = int32(kernel_index_vec1);   % int32 vector.
+% GF_info.kernel_index_mat0 = int32(kernel_index_mat0);   % int32 matrix.
+% GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
 
-%% Blackwell-measure construction.
 L = 16;
-
 addpath('sim/');
 % if code rate=1/2, in QPSK channel Es/n0 = Eb/n0.
-
 % simulation.
+
 Ebn0_arr = [1.25, 1.5, 1.75, 2.00, 2.25, 2.5, 2.75, 3.00];
-min_errors = 1200;
+min_errors = 1600;
 N_Ebn0 = length(Ebn0_arr);
 BLERs = zeros(1, N_Ebn0);
 
@@ -63,6 +61,7 @@ for idx = 1:N_Ebn0
 end
 
 save('data/bm_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical_BM', 'N', 'M');
+fprintf('Files saved.\n');
 
 %% N512 binary code.
 N = 512;
