@@ -1,4 +1,4 @@
-load('C:/Users/John Zhu/Desktop/instant_files/bm/bm_p128_N256.mat');
+load('bm_p128_N256.mat');
 fprintf('Load BM data complete.\n');
 
 %% Get capacities.

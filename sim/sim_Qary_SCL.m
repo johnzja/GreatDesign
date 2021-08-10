@@ -31,7 +31,7 @@ decoder_config.is_list          = true;
 decoder_config.L                = L;
 
 % Setup parallel parameters.
-N_parallel = 16;
+N_parallel = 25;
 assert(mod(min_errors, N_parallel) == 0, 'invalid N_parallel!');
 min_errors_each = min_errors / N_parallel;
 N_runs_each = zeros(1, N_parallel);
