@@ -1,6 +1,7 @@
 %% Study 3-D Blackwell Measure.
 clc;clear;
 addpath('codes/polar/GA/');
+addpath('blackwell_measure/');
 
 P = 1;                  % The constellation power is 2P.
 A = sqrt(P);            % Amplitude on I or Q.
@@ -71,7 +72,7 @@ sigma = A * (10^(-Esn0/20));
 % axis equal;
 
 %% Calculate the exact Blackwell Measure for QPSK-AWGN channel.
-N_bins_each_dim = 256;
+N_bins_each_dim = 128;
 bin_centers = linspace(0, 1, N_bins_each_dim);
 % index of the bins: 1 ~ N_bins_each_dim.
 % index0 + index1 <= N + 1.
@@ -324,6 +325,6 @@ for idx0 = 1:N_bins_each_dim
 end
 
 assert(N_kernel_cnt == N_kernel_cnt_new);
-fprintf('Kernel construction complete!');
+fprintf('Kernel construction complete!\n');
 
 
