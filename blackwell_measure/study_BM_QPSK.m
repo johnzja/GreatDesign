@@ -1,6 +1,7 @@
 %% Study 3-D Blackwell Measure.
 clc;clear;
 addpath('codes/polar/GA/');
+addpath('blackwell_measure/');
 
 P = 1;                  % The constellation power is 2P.
 A = sqrt(P);            % Amplitude on I or Q.

@@ -8,8 +8,8 @@ GF_info.kernel_index_vec1 = int32(kernel_index_vec1);   % int32 vector.
 GF_info.kernel_index_mat0 = int32(kernel_index_mat0);   % int32 matrix.
 GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
 
-GF_info.num_threads = 6;
-GF_info.jobs_each_thread = 4;
+GF_info.num_threads = 63;
+GF_info.jobs_each_thread = 1;
 
 n = 8;
 N = 2^n;
