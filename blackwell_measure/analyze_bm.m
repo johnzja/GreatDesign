@@ -15,8 +15,10 @@ polarized_channels = Synth_channels{n+1};
 polarized_channels = {polarized_channels{bitrevorder(1:N)}};
 
 C = zeros(N,1);
+Pe = zeros(N,1);
 for idx = 1:N
     C(idx) = get_I_4D(polarized_channels{idx}, bin_centers);
+    Pe(idx) = get_pe_4D(polarized_channels{idx}, bin_centers);
 end
 
 I_total = sum(C);
@@ -24,8 +26,7 @@ I_total = sum(C);
 total_capacity_error = (I_total - N*I)/(N*I);
 fprintf('Total capacity error = %.2f %%\n', total_capacity_error*100);
 
-%% Code construction, R=1/2.
-
+%% Code construction, R=1/2, using BM method.
 [~, order] = sort(C, 'descend');
 M = 128;
 R = M/N;
@@ -34,6 +35,12 @@ info_syms = sort(order(1:M), 'ascend').';
 info_bits_logical_BM = false(1,N);
 info_bits_logical_BM(info_syms) = true;
 fprintf('BM Code construction: Complete.\n');
+
+[~, order] = sort(Pe, 'ascend');
+info_syms = sort(order(1:M), 'ascend').';
+info_bits_logical_BM_Pe = false(1,N);
+info_bits_logical_BM_Pe(info_syms) = true;
+fprintf('BM Pe Code construction: Complete.\n');
 
 %% Required simulation. Blackwell-measure construction.
 GF_info.m = 2;          % GF(2^2).
@@ -97,9 +104,9 @@ addpath('codes/polar/GA/');
 [channels, ~] = GA(sigma, N);
 [~, order_GA] = sort(channels, 'descend');
 info_bits = sort(order_GA(1 : M), 'ascend');
-info_bits_logical = false(1,N);
-info_bits_logical(info_bits) = true;
-frozen_bits = ~info_bits_logical;
+info_bits_logical_GA = false(1,N);
+info_bits_logical_GA(info_bits) = true;
+frozen_bits = ~info_bits_logical_GA;
 
 
 % if code rate=1/2, in QPSK channel Es/n0 = Eb/n0.
@@ -111,10 +118,10 @@ BLERs = zeros(1, N_Ebn0);
 
 for idx = 1:N_Ebn0
     Ebn0 = Ebn0_arr(idx);
-    BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical, Ebn0, min_errors, L, GF_info);
+    BLERs(idx) = sim_Qary_SCL(N, M, false, info_bits_logical_GA, Ebn0, min_errors, L, GF_info);
 end
 
-save('data/ga_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical', 'N', 'M');
+save('data/ga_construction_q4_L16.mat', 'Ebn0_arr', 'BLERs', 'L', 'info_bits_logical_GA', 'N', 'M');
 
 %% Plot
 figure;

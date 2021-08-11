@@ -5,14 +5,13 @@ addpath('codes/polar/GA/');
 P = 1;                  % The constellation power is 2P.
 A = sqrt(P);            % Amplitude on I or Q.
 
-A0 = A*[1,1];
-A1 = A*[-1,1];
-A2 = A*[-1,-1];
-A3 = A*[1, -1];
+A0 = A*[ 1,  1];
+A1 = A*[-1,  1];
+A2 = A*[ 1, -1];
+A3 = A*[-1, -1];
 
 Esn0 = 1.5;             % unit: dB
 
-% sigma = 0.8;
 sigma = A * (10^(-Esn0/20));
 
 
@@ -72,7 +71,7 @@ sigma = A * (10^(-Esn0/20));
 % axis equal;
 
 %% Calculate the exact Blackwell Measure for QPSK-AWGN channel.
-N_bins_each_dim = 128;
+N_bins_each_dim = 256;
 bin_centers = linspace(0, 1, N_bins_each_dim);
 % index of the bins: 1 ~ N_bins_each_dim.
 % index0 + index1 <= N + 1.
@@ -91,7 +90,7 @@ bm_dist = zeros(N_bins_each_dim, N_bins_each_dim, N_bins_each_dim);
 %     end
 % end
 
-Nb = 2000;
+Nb = 4000;
 p = 1/Nb;
 
 proba_bins = linspace(0,1,Nb+1);
@@ -162,8 +161,7 @@ fprintf('Theoretical QPSK channel I = %f bits/ch.use\n', I_QPSK);
 I = get_I_4D(bm_dist, bin_centers);
 fprintf('BM I = %f bits\n\n', I);
 
-% Decomposition: Decompose into 4-ary symmetric channels and evaluate the
-% capacity.
+%% Decomposition: Decompose into 4-ary symmetric channels and evaluate the capacity.
 bm_dist_visited = false(N_bins_each_dim,N_bins_each_dim,N_bins_each_dim);
 I = 0;
 total_mass = 0;
@@ -186,6 +184,10 @@ for idx0 = 1:N_bins_each_dim
             t1 = bm_dist(idx1, idx0, idx3);
             t2 = bm_dist(idx2, idx3, idx0);
             t3 = bm_dist(idx3, idx2, idx1);
+            
+            if ~(t0 == t1 && t1 == t2 && t2 == t3)
+                warning('Symmetry violated');
+            end
             
             bm_dist_visited(idx0, idx1, idx2)=true;
             bm_dist_visited(idx1, idx0, idx3)=true;
@@ -322,6 +324,6 @@ for idx0 = 1:N_bins_each_dim
 end
 
 assert(N_kernel_cnt == N_kernel_cnt_new);
-
+fprintf('Kernel construction complete!');
 
 

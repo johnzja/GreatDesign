@@ -1,3 +1,4 @@
+%% Setup MEX parameters.
 GF_info.m = 2;          % GF(2^2).
 GF_info.alpha = 2;
 GF_info.mult_table  = [0, 0, 0, 0; 0, 1, 2, 3; 0, 2, 3, 1; 0, 3, 1, 2];
@@ -10,12 +11,12 @@ GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
 GF_info.num_threads = 6;
 GF_info.jobs_each_thread = 4;
 
-n = 7;
+n = 8;
 N = 2^n;
 Nb = 2*N;       % Binary code length.
 
 %% Polarization process.
-addpath(strrep('D:\iTsinghua\Major\github_syncs\Encoding\PolarCpp\PolarCpp\x64\Release', '\', '/'));
+addpath(strrep('../PolarCpp/PolarCpp/Release', '\', '/'));
 
 Synth_channels = cell(n+1,1);
 Synth_channels{1} = cell(1,1);
@@ -48,17 +49,12 @@ for layer = 1:n
     mean_time_n = mean(this_layer_time_n);
     mean_time_p = mean(this_layer_time_p);
     total_time_cost = sum(this_layer_time_n) + sum(this_layer_time_p);
-    Synth_channels{layer+1} = {this_layer_1{:}, this_layer_2{:}};
+    synth_ch = {this_layer_1{:}, this_layer_2{:}};
+    Synth_channels{layer+1} = synth_ch;
+    
     fprintf('Layer %d polarization complete with mean Wn time cost = %.2fs and Wp time cost = %.2fs, TOTAL time = %.2fs\n', ...
         layer, mean_time_n, mean_time_p, total_time_cost);
+    % Save files.
+    save(sprintf('data/bm_synth_channels_Nbins%d_layer%d.mat', N_bins_each_dim, layer), 'synth_ch', 'layer', 'total_time_cost');
 end
 
-
-%% Get the capacities.
-% IWn = get_I_4D(Wn, bin_centers);
-% IWp = get_I_4D(Wp, bin_centers);
-
-
-%% Utils.
-
-% All the utils have been written as .m files.

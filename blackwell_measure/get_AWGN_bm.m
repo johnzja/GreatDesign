@@ -45,6 +45,7 @@ for iter = 1:N_bins
     bm_dist(iter) = p;
 end
 
+%% Transforms
 figure(1);
 plot(bin_centers, bm_dist);
 hold on;
@@ -67,8 +68,7 @@ PeWn = get_pe_ML(Wn, bin_centers);
 fprintf('Channel: AWGN Eb/n0=%f\n IW=%f bits\tIW+=%f bits\tIW-=%f bits\n', Ebn0, IW, IWp, IWn);
 fprintf('Pe=%f\tPe+=%f\tPe-=%f\n', PeW, PeWp, PeWn);
 
-pause;
-
+%%
 I_synth = zeros(1, N);      % fill in this vector last.
 Pe_synth = zeros(1, N);
 W_mat = zeros(N, N_bins);   % in bit-rev order.
