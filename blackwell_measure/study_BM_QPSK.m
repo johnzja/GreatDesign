@@ -91,7 +91,7 @@ bm_dist = zeros(N_bins_each_dim, N_bins_each_dim, N_bins_each_dim);
 %     end
 % end
 
-Nb = 4000;
+Nb = 2000;
 p = 1/Nb;
 
 proba_bins = linspace(0,1,Nb+1);
