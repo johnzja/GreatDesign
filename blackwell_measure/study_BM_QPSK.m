@@ -10,10 +10,14 @@ A1 = A*[-1,  1];
 A2 = A*[ 1, -1];
 A3 = A*[-1, -1];
 
-Esn0 = 1.5;             % unit: dB
+Esn0 = 0.187;             % unit: dB
 
 sigma = A * (10^(-Esn0/20));
+I_theoretical = log2(1+(A/sigma)^2);            % Maximum value achievable.
+fprintf('Theoretical AWGNC Gaussian-input I = %f bits/ch.use\n', I_theoretical);
 
+I_QPSK = 2*Capacity_Binary_AWGN(A, sigma);
+fprintf('Theoretical QPSK channel I = %f bits/ch.use\n', I_QPSK);
 
 %% Do QPSK sampling.
 % N_sample = 10000;
@@ -71,7 +75,7 @@ sigma = A * (10^(-Esn0/20));
 % axis equal;
 
 %% Calculate the exact Blackwell Measure for QPSK-AWGN channel.
-N_bins_each_dim = 128;
+N_bins_each_dim = 150;
 bin_centers = linspace(0, 1, N_bins_each_dim);
 % index of the bins: 1 ~ N_bins_each_dim.
 % index0 + index1 <= N + 1.
@@ -90,7 +94,7 @@ bm_dist = zeros(N_bins_each_dim, N_bins_each_dim, N_bins_each_dim);
 %     end
 % end
 
-Nb = 2000;
+Nb = 2500;
 p = 1/Nb;
 
 proba_bins = linspace(0,1,Nb+1);
@@ -152,11 +156,7 @@ end
 fprintf('Construct QPSK BM complete!\n');
 
 %% Display bm_dist using 3D density plot...
-I_theoretical = log2(1+(A/sigma)^2);            % Maximum value achievable.
-fprintf('Theoretical AWGNC Gaussian-input I = %f bits/ch.use\n', I_theoretical);
 
-I_QPSK = 2*Capacity_Binary_AWGN(A, sigma);
-fprintf('Theoretical QPSK channel I = %f bits/ch.use\n', I_QPSK);
 
 I = get_I_4D(bm_dist, bin_centers);
 fprintf('BM I = %f bits\n\n', I);
