@@ -71,7 +71,7 @@ sigma = A * (10^(-Esn0/20));
 % axis equal;
 
 %% Calculate the exact Blackwell Measure for QPSK-AWGN channel.
-N_bins_each_dim = 256;
+N_bins_each_dim = 128;
 bin_centers = linspace(0, 1, N_bins_each_dim);
 % index of the bins: 1 ~ N_bins_each_dim.
 % index0 + index1 <= N + 1.
@@ -90,7 +90,7 @@ bm_dist = zeros(N_bins_each_dim, N_bins_each_dim, N_bins_each_dim);
 %     end
 % end
 
-Nb = 4000;
+Nb = 2000;
 p = 1/Nb;
 
 proba_bins = linspace(0,1,Nb+1);
@@ -324,6 +324,6 @@ for idx0 = 1:N_bins_each_dim
 end
 
 assert(N_kernel_cnt == N_kernel_cnt_new);
-fprintf('Kernel construction complete!');
+fprintf('Kernel construction complete!\n');
 
 
