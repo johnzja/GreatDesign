@@ -1,4 +1,6 @@
 %% Setup MEX parameters.
+fclose all;
+
 GF_info.m = 2;          % GF(2^2).
 GF_info.alpha = 2;
 GF_info.mult_table  = [0, 0, 0, 0; 0, 1, 2, 3; 0, 2, 3, 1; 0, 3, 1, 2];
@@ -8,16 +10,24 @@ GF_info.kernel_index_vec1 = int32(kernel_index_vec1);   % int32 vector.
 GF_info.kernel_index_mat0 = int32(kernel_index_mat0);   % int32 matrix.
 GF_info.kernel_index_mat1 = int32(kernel_index_mat1);   % int32 matrix.
 
-GF_info.num_threads = 63;
-GF_info.jobs_each_thread = 1;
+debug = false;
 
+if ~debug
+    GF_info.num_threads = 63;
+    GF_info.jobs_each_thread = 1;
+    addpath(strrep('../PolarCpp/PolarCpp/Release', '\', '/'));
+else
+    GF_info.num_threads = 1;
+    GF_info.jobs_each_thread = 1;
+    addpath(strrep('../PolarCpp/PolarCpp/x64/Debug', '\', '/'));
+end
+    
 n = 8;
 N = 2^n;
 Nb = 2*N;       % Binary code length.
 
-%% Polarization process.
-addpath(strrep('../PolarCpp/PolarCpp/Release', '\', '/'));
 
+%% Polarization process.
 Synth_channels = cell(n+1,1);
 Synth_channels{1} = cell(1,1);
 Synth_channels{1}{1} = bm_dist;
