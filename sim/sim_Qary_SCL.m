@@ -27,11 +27,15 @@ decoder_config.is_qary          = true;
 decoder_config.is_LLR           = true;
 decoder_config.is_Genie         = false;
 decoder_config.update_decoder   = true;       % it can be automatically modified into false.
-decoder_config.is_list          = true;
+if L <= 1
+    decoder_config.is_list      = false;        % Just use SC.
+else
+    decoder_config.is_list      = true;
+end
 decoder_config.L                = L;
 
 % Setup parallel parameters.
-N_parallel = 25;
+N_parallel = 8;
 assert(mod(min_errors, N_parallel) == 0, 'invalid N_parallel!');
 min_errors_each = min_errors / N_parallel;
 N_runs_each = zeros(1, N_parallel);

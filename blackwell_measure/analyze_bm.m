@@ -1,5 +1,6 @@
 fprintf('Start loading BM data...\n');
-load('bm_p128_N256.mat');
+addpath('C:/Users/dell/Desktop/instant_files/bm/exp3');
+load('bm_synth_channels_Nbins150_layer8.mat');
 fprintf('Load BM data complete.\n');
 
 %% Get capacities.
@@ -11,14 +12,13 @@ if ~exist('bin_centers', 'var')
     bin_centers = linspace(0, 1, N_bins_each_dim);
 end
 
-polarized_channels = Synth_channels{n+1};
-polarized_channels = {polarized_channels{bitrevorder(1:N)}};
+polarized_channels = synth_ch(bitrevorder(1:N));
 
 C = zeros(N,1);
 Pe = zeros(N,1);
 for idx = 1:N
     C(idx) = get_I_4D(polarized_channels{idx}, bin_centers);
-    Pe(idx) = get_pe_4D(polarized_channels{idx}, bin_centers);
+    %Pe(idx) = get_pe_4D(polarized_channels{idx}, bin_centers);
 end
 
 I_total = sum(C);
@@ -36,6 +36,7 @@ info_bits_logical_BM = false(1,N);
 info_bits_logical_BM(info_syms) = true;
 fprintf('BM Code construction: Complete.\n');
 
+%% BM-PE construction
 [~, order] = sort(Pe, 'ascend');
 info_syms = sort(order(1:M), 'ascend').';
 info_bits_logical_BM_Pe = false(1,N);
@@ -100,8 +101,10 @@ N = 256;
 M = 128;
 L = 16;
 
+Esn0 = 1.5;             % unit: dB
+sigma_GA = 1 * (10^(-Esn0/20));
 addpath('codes/polar/GA/');
-[channels, ~] = GA(sigma, N);
+[channels, ~] = GA(sigma_GA, N);
 [~, order_GA] = sort(channels, 'descend');
 info_bits = sort(order_GA(1 : M), 'ascend');
 info_bits_logical_GA = false(1,N);
